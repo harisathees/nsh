@@ -1,14 +1,16 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  PlusCircle, 
-  FileText, 
-  Users, 
+import { NavLink, useNavigate } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  PlusCircle,
+  FileText,
+  Users,
   Settings,
-  X
+  X,
+  LogOut
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { supabase } from '../../lib/supabase'
 
 interface SidebarProps {
   isOpen: boolean
@@ -24,21 +26,30 @@ const navigation = [
 ]
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
+
   return (
     <>
       {/* Mobile overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b lg:justify-center">
@@ -75,7 +86,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
                     {item.name}
                   </NavLink>
-                  
                 ))}
 
                 {navigation.slice(2, 4).map((item) => (
@@ -98,14 +108,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 ))}
               </div>
             </div>
-          
-           {/* for space section                  */}
-              
-            {/* <div className="mb-6"> */}
-              {/* <div className="space-y-1">
-                
-              </div> */}
-            {/* </div> */}
 
             <div>
               <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -134,7 +136,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
           </nav>
 
-          {/* User info */}
+          {/* User Info + Logout */}
           <div className="p-4 border-t">
             <div className="flex items-center space-x-3">
               <div className="relative">
@@ -150,6 +152,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <p className="text-xs text-gray-500 truncate">Admin</p>
               </div>
             </div>
+
+            <button
+              onClick={handleLogout}
+              className="mt-4 w-full flex items-center px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
+            >
+              <LogOut className="mr-2 h-5 w-5" />
+              Logout
+            </button>
           </div>
         </div>
       </div>
