@@ -8,11 +8,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        // This is the key part!
-        storage: window.localStorage, 
-        persistSession: true,
-    },
+  auth: {
+    persistSession: true,
+    storage: localStorage, 
+  },
 });
 
 // Types for our database tables
