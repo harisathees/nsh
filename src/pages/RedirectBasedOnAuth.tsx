@@ -1,24 +1,22 @@
-// src/screens/RedirectBasedOnAuth.tsx
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
-export const RedirectBasedOnAuth = () => {
+export function RedirectBasedOnAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session) {
-        navigate('/dashboard'); // 🔐 user is logged in
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        navigate("/dashboard");
       } else {
-        navigate('/login'); // 🚪 not logged in
+        navigate("/login");
       }
     };
 
     checkSession();
   }, [navigate]);
 
-  return null;
-};
+  return null; // No UI needed
+}

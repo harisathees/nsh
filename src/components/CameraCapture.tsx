@@ -163,6 +163,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
   if (!isOpen) return null;
 
+
+  
+
   return (
     <div className="fixed inset-0 z-50 bg-black">
       <div className="relative w-full h-full">

@@ -18,19 +18,21 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 🔁 Dynamic redirect for root */}
+        {/* 🔁 Root route decides where to go (dashboard or login) */}
         <Route path="/" element={<RedirectBasedOnAuth />} />
-        
-        {/* Static routes */}
+
+        {/* Public login route */}
         <Route path="/login" element={<Login />} />
+
+        {/* Routes outside Layout */}
         <Route path="/create-pledge" element={<CreatePledge />} />
         <Route path="/view-pledge/:loanId" element={<ViewPledge />} />
         <Route path="/edit-pledge/:loanId" element={<EditPledge />} />
         <Route path="/close-pledge/:loanId" element={<ClosePledge />} />
         <Route path="/print-notice/:loanId" element={<NoticePrint />} />
 
-        {/* Layout-based routes */}
-        <Route path="/" element={<Layout />}>
+        {/* Routes inside the main layout */}
+        <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/pledge-entry" element={<PledgeEntry />} />
