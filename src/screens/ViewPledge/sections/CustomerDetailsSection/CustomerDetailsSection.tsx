@@ -1,4 +1,4 @@
-import { EyeIcon } from "lucide-react";
+import { EyeIcon, MicIcon } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { Customer } from "../../../../lib/supabase";
 import { Button } from "../../../../components/ui/button";
@@ -90,7 +90,7 @@ export const CustomerDetailsSection = ({ customer }: CustomerDetailsSectionProps
         {/* Preview Image Section */}
         <div className="mt-8 flex flex-col items-center">
           <div className="relative mb-3">
-            <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
+            <div className="w-40 h-40 rounded-2xl overflow-hidden bg-gray-100 border-4 border-white shadow-lg">
               {customer.photo_url ? (
                 <img
                   className="w-full h-full object-cover"
@@ -109,8 +109,8 @@ export const CustomerDetailsSection = ({ customer }: CustomerDetailsSectionProps
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <EyeIcon className="w-4 h-4" />
             <span>Preview Image</span>
+            <EyeIcon className="w-4 h-4" />
           </div>
         </div>
 
@@ -144,8 +144,10 @@ export const CustomerDetailsSection = ({ customer }: CustomerDetailsSectionProps
               </div>
             )}
           </div>
-          <div className="text-sm text-gray-600">
-            Preview Audio
+          
+          <div className="flex items-center gap-2">
+            <span>Preview Audio</span>
+            <MicIcon className="w-4 h-4" />
           </div>
         </div>
       </CardContent>

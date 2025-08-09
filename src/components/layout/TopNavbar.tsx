@@ -33,10 +33,10 @@ export function TopNavbar({ onMenuClick }: TopNavbarProps) {
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
-          <button className="p-2 rounded-md hover:bg-gray-100 relative">
+          {/* <button className="p-2 rounded-md hover:bg-gray-100 relative">
             <Bell className="w-5 h-5 text-gray-600" />
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-          </button>
+          </button> */}
 
           <div className="flex items-center space-x-3">
             <div className="relative">
@@ -45,12 +45,12 @@ export function TopNavbar({ onMenuClick }: TopNavbarProps) {
                   SH
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+              {/* <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
             </div>
 
             <div className="hidden sm:block">
               <p className="text-sm font-semibold text-gray-900">Sabari Harish</p>
-              <p className="text-xs text-gray-500">Admin</p>
+              {/* <p className="text-xs text-gray-500">Admin</p> */}
             </div>
           </div>
         </div>

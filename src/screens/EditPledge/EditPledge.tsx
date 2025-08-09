@@ -249,9 +249,9 @@ export const EditPledge = (): JSX.Element => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-[#ea9f39]" />
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading pledge data...</p>
         </div>
       </div>
@@ -285,7 +285,7 @@ export const EditPledge = (): JSX.Element => {
         {/* Header */}
         <button
               onClick={() => navigate('/customers')}
-              className="h-10 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 bg-white text-gray-700 font-medium transition-colors"
+              className="h-10 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 bg-white text-gray-700 font-medium transition-colors mb-5"
             >
               ← Back to Customers
             </button>

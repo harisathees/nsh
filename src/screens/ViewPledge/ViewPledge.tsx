@@ -5,6 +5,7 @@ import { CustomerDetailsSection } from "./sections/CustomerDetailsSection/Custom
 import { JewelDetailsSection } from "./sections/JewelDetailsSection/JewelDetailsSection";
 import { LoanDetailsSection } from "./sections/LoanDetailsSection/LoanDetailsSection";
 import { CalculationResultsSection } from "./sections/CalculationResultsSection/CalculationResultsSection";
+import { PrinterIcon } from "lucide-react"; // Import icon
 
 export const ViewPledge = (): JSX.Element => {
   const { loanId } = useParams<{ loanId: string }>();
@@ -45,41 +46,41 @@ export const ViewPledge = (): JSX.Element => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      {/* Header with back button */}
+      {/* Header with back and print button */}
       <div className="bg-white shadow-sm border-b border-gray-200 p-4 mb-6 rounded-2xl">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <button
+              <button
               onClick={() => navigate('/customers')}
-              className="h-10 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 bg-white text-gray-700 font-medium transition-colors"
+              className="h-10 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 bg-white text-gray-700 font-medium transition-colors mb-3"
             >
               ← Back to Customers
             </button>
-            <div className="text-sm text-gray-600">
-              Viewing Loan ID: <span className="font-medium text-gray-800">{loanId}</span>
-            </div>
+           
           </div>
+
+          {/* Print Button */}
+          <button
+            onClick={() => navigate(`/print-notice/${loanId}`)}
+            className="flex items-center gap-2 h-10 px-4 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-xl"
+          >
+            <PrinterIcon className="w-5 h-5" />
+            Print Notice
+          </button>
         </div>
       </div>
-      
+
       <div className="max-w-7xl mx-auto">
-        {/* Mobile: Stack vertically, Desktop: Side by side */}
+        {/* Sections */}
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-          {/* Customer Details Section */}
           <div className="flex-1 lg:max-w-md">
             <CustomerDetailsSection customer={data.customer} />
           </div>
-          
-          {/* Jewel Details Section */}
           <div className="flex-1 lg:max-w-md">
             <JewelDetailsSection jewels={data.jewels} />
           </div>
-          
-          {/* Loan Details Section */}
           <div className="flex-1 lg:max-w-md">
             <LoanDetailsSection loan={data.loan} calculation={data.calculation} />
-            
-            {/* Calculation Results Section - Only for Closed Loans */}
             {data.loan.status === 'Closed' && data.calculation && (
               <div className="mt-6">
                 <CalculationResultsSection calculation={data.calculation} />

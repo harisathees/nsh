@@ -61,8 +61,8 @@ export const JewelDetailsSection = ({ jewels }: JewelDetailsSectionProps): JSX.E
             </div>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <EyeIcon className="w-4 h-4" />
             <span>Preview Image</span>
+             <EyeIcon className="w-4 h-4" />
           </div>
           {jewels.length > 1 && (
             <p className="text-xs text-gray-500 mt-1">Showing 1 of {jewels.length} jewels</p>
