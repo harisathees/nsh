@@ -298,7 +298,7 @@ const buttonStyle = (bg: string) => ({
 
 
 const fields = (data: any) => [
-  //of
+  //officer copy
   { top: '100.5mm', left: '201mm', label: `Date:${data.date}` },
   { top: '100.5mm', left: '196mm', label: `Due :${data.duedate}` },
   { top: '100.5mm', left: '188mm', label: `G:${data.goldRate}` },
@@ -316,7 +316,7 @@ const fields = (data: any) => [
   { top: '44mm', left: '164mm', label: `எடை: ${data.weight}g` },
   { top: '44mm', left: '156mm', label: ` ${data.phone},${data.whatsapp}` },
 
-  //cc
+  //customer copy
   
   { top: '100.5mm', left: '95mm', label: `Date:${data.date}` },
   { top: '100.5mm', left: '90mm', label: `Due :${data.duedate}` },
@@ -329,7 +329,7 @@ const fields = (data: any) => [
   { top: '44mm', left: '70mm', label: `பெயர்: ${data.name}` },
   { top: '44mm', left: '62mm', label: `தொகை: ₹${data.amount}/-` },
   { top: '44mm', left: '54mm', label: `எடை: ${data.weight}g` },
-  { top: '44mm', left: '46mm', label: ` ${data.phone},${data.whatsapp}` },
+  { top: '100.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
 
 ];
 
