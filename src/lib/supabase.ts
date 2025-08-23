@@ -226,3 +226,49 @@ export type Database = {
     }
   }
 }
+
+
+//bank and repledge
+export interface Bank {
+  id: string;
+  bank_name: string;
+  jewel_details?: string;
+  jewel_name?: string;
+  pieces?: number;
+  gross_weight?: number;
+  stone_weight?: number;
+  net_weight?: number;
+  loan_no?: string;
+  date?: string;
+  amount?: number;
+  interest_rate?: number;
+  validity?: string;
+  invest?: number;
+  payment_method?: string;
+  repledge_interest?: number;
+  processing_fee?: number;
+  created_at?: string;
+}
+
+export interface RepledgeEntry {
+  id: string;
+  bank_name?: string;
+  jewel_details?: string;
+  jewel_name?: string;
+  pieces?: number;
+  gross_weight?: number;
+  stone_weight?: number;
+  net_weight?: number;
+  loan_no?: string;
+  date?: string;
+  amount?: number;
+  interest_rate?: number;
+  validity?: string;
+  invest?: number;
+  payment_method?: string;
+  repledge_interest?: number;
+  processing_fee?: number;
+  created_at?: string;
+}
+
+export type RepledgeEntryInsert = Omit<RepledgeEntry, 'id' | 'created_at'>;

@@ -13,6 +13,8 @@ import { ClosePledge } from "../nsh/src/screens/ClosePledge/ClosePledge";
 import NoticePrint from "./src/notice/noticeform/NoticePrint";
 import { MetalRatesSettings } from './src/pages/MetalRatesSettings';
 import { RedirectBasedOnAuth } from "./src/pages/RedirectBasedOnAuth";
+import { RepledgeEntryForm } from "./src/screens/RePledge/RepledgeEntryForm";
+import { BanksPage } from "./src/pages/BanksPage";
 
 export default function App() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/re-pledge-entry/bank" element={<BanksPage />} />
+          <Route path="/re-pledge-entry/add" element={<RepledgeEntryForm />} />
           <Route path="/pledge-entry" element={<PledgeEntry />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/settings" element={<Settings />} />

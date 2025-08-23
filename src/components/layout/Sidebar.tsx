@@ -1,13 +1,18 @@
-import React from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   PlusCircle,
+  Landmark,
   FileText,
   Users,
   Settings,
   X,
-  LogOut
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  Building2,
+  RefreshCw
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -17,13 +22,117 @@ interface SidebarProps {
   onClose: () => void
 }
 
-const navigation = [
+interface NavigationItem {
+  name: string
+  href?: string
+  icon: any
+  children?: NavigationItem[]
+}
+
+const navigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Pledge Entry', href: '/pledge-entry', icon: PlusCircle },
+  { 
+    name: 'Re-Pledge', 
+    icon: Landmark,
+    children: [
+      { name: 'Add Re-pledge', href: '/re-pledge-entry/add', icon: PlusCircle },
+      { name: 'Add Bank', href: '/re-pledge-entry/bank', icon: Building2 },
+    ]
+  },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Customers', href: '/customers', icon: Users },
   { name: 'Master Settings', href: '/settings', icon: Settings },
 ]
+
+interface NavigationItemComponentProps {
+  item: NavigationItem
+  onClose: () => void
+  level?: number
+}
+
+function NavigationItemComponent({ item, onClose, level = 0 }: NavigationItemComponentProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const location = useLocation()
+  
+  // Check if current path matches this item or any of its children
+  const isActive = item.href === location.pathname || 
+    (item.children && item.children.some(child => child.href === location.pathname))
+  
+  // Auto-expand if any child is active
+  React.useEffect(() => {
+    if (item.children && item.children.some(child => child.href === location.pathname)) {
+      setIsExpanded(true)
+    }
+  }, [location.pathname, item.children])
+
+  const handleClick = () => {
+    if (item.children) {
+      setIsExpanded(!isExpanded)
+    } else if (item.href) {
+      onClose()
+    }
+  }
+
+  if (item.children) {
+    return (
+      <div>
+        <button
+          onClick={handleClick}
+          className={cn(
+            "w-full group flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors",
+            level > 0 ? "pl-6" : "",
+            isActive
+              ? "bg-blue-50 text-blue-700"
+              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          )}
+        >
+          <div className="flex items-center">
+            <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+            {item.name}
+          </div>
+          {isExpanded ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </button>
+        
+        {isExpanded && (
+          <div className="ml-6 mt-1 space-y-1">
+            {item.children.map((child) => (
+              <NavigationItemComponent
+                key={child.name}
+                item={child}
+                onClose={onClose}
+                level={level + 1}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <NavLink
+      to={item.href!}
+      onClick={onClose}
+      className={({ isActive }) =>
+        cn(
+          "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
+          level > 0 ? "pl-9" : "",
+          isActive
+            ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+        )
+      }
+    >
+      <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+      {item.name}
+    </NavLink>
+  )
+}
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate()
@@ -63,77 +172,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            <div className="mb-6">
-              <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                General
-              </h3>
-              <div className="mt-2 space-y-1">
-                {navigation.slice(0, 2).map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                        isActive
-                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {item.name}
-                  </NavLink>
-                ))}
-
-                {navigation.slice(2, 4).map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                        isActive
-                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {item.name}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="px-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tools
-              </h3>
-              <div className="mt-2 space-y-1">
-                {navigation.slice(4).map((item) => (
-                  <NavLink
-                    key={item.name}
-                    to={item.href}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      cn(
-                        "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                        isActive
-                          ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      )
-                    }
-                  >
-                    <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                    {item.name}
-                  </NavLink>
-                ))}
-              </div>
-            </div>
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+            {navigation.map((item) => (
+              <NavigationItemComponent
+                key={item.name}
+                item={item}
+                onClose={onClose}
+              />
+            ))}
           </nav>
 
           {/* User Info + Logout */}
