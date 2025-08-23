@@ -1,0 +1,24 @@
+.notice-letter {
+  max-width: 800px;
+  margin: auto;
+  background: #fff;
+  padding: 40px;
+  color: #000;
+  border: 1px solid #000;
+}
+
+/* Print only the letter */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .notice-letter, .notice-letter * {
+    visibility: visible;
+  }
+  .notice-letter {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

@@ -329,7 +329,7 @@ const fields = (data: any) => [
   { top: '44mm', left: '70mm', label: `பெயர்: ${data.name}` },
   { top: '44mm', left: '62mm', label: `தொகை: ₹${data.amount}/-` },
   { top: '44mm', left: '54mm', label: `எடை: ${data.weight}g` },
-  { top: '44mm', left: '46mm', label: ` ${data.phone},${data.whatsapp}` },
+  { top: '100.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
 
 ];
 

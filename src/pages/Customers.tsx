@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { calculateLoanStatus, getStatusAbbreviation, getStatusColor } from '../lib/loanUtils';
 import * as XLSX from 'xlsx';
+import { FiSearch, FiFilter } from 'react-icons/fi';
+import { FaUsers } from 'react-icons/fa';
 
 interface Customer {
   id: string;
@@ -25,17 +27,30 @@ interface Customer {
 export const Customers: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [loanNoSearch, setLoanNoSearch] = useState('');
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('Date Added');
   const [statusFilter, setStatusFilter] = useState('All');
   const [validityFilter, setValidityFilter] = useState('All');
-  const [sortBy, setSortBy] = useState('Date Added');
+  const [showSort, setShowSort] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCustomers();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setShowSort(false);
+      }
+    };
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSort]);
 
   const fetchCustomers = async () => {
     try {
@@ -118,21 +133,19 @@ export const Customers: React.FC = () => {
     }
   };
 
+  // Unified search, filter, and sort
   const filteredCustomers = customers
-    .filter((customer) =>
-      customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.mobile_no?.includes(searchTerm) ||
-      customer.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((customer) =>
-      loanNoSearch === '' ? true : customer.loan_no?.toLowerCase().includes(loanNoSearch.toLowerCase())
-    )
-    .filter((customer) =>
-      statusFilter === 'All' ? true : customer.loan_status === statusFilter
-    )
-    .filter((customer) =>
-      validityFilter === 'All' ? true : customer.validity_months === Number(validityFilter)
-    )
+    .filter((customer) => {
+      const s = search.toLowerCase();
+      const matches =
+        customer.name?.toLowerCase().includes(s) ||
+        customer.mobile_no?.includes(s) ||
+        customer.address?.toLowerCase().includes(s) ||
+        customer.loan_no?.toLowerCase().includes(s);
+      const statusMatch = statusFilter === 'All' ? true : customer.loan_status === statusFilter;
+      const validityMatch = validityFilter === 'All' ? true : customer.validity_months === Number(validityFilter);
+      return matches && statusMatch && validityMatch;
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case 'Name':
@@ -168,55 +181,85 @@ export const Customers: React.FC = () => {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <span className="text-blue-600">👥</span>
+            <span className="text-blue-600">
+              <FaUsers size={28} />
+            </span>
             Customers
           </h1>
-          <p className="text-gray-600 mt-1">Manage your customers and their loans</p>
+          {/* <p className="text-gray-600 mt-1">Manage your customers and their loans</p> */}
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Search name / phone / address"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        />
-        <input
-          type="text"
-          placeholder="Search by Loan No"
-          value={loanNoSearch}
-          onChange={(e) => setLoanNoSearch(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="All">All Statuses</option>
-          <option value="Active">Active</option>
-          <option value="Overdue">Overdue</option>
-          <option value="Closed">Closed</option>
-          <option value="No Loan">No Loan</option>
-        </select>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="Date Added">Sort by Date Added</option>
-          <option value="Loan Date">Sort by Loan Date</option>
-          <option value="Name">Sort by Name</option>
-        </select>
+      {/* Unified Search & Single Sort Icon */}
+      <div className="flex items-center gap-2 mb-4 relative">
+        <div className="relative flex-1">
+          <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search name, phone, address, or loan no..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-slate-100 border-transparent rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition"
+          />
+        </div>
         <button
-          onClick={exportToExcel}
-          className="bg-green-600 hover:bg-green-700 text-white px-2 py-3 rounded-lg text-sm"
+          className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-full p-2 border border-gray-300"
+          onClick={() => setShowSort((v) => !v)}
+          title="Sort & Filter"
         >
-            Export 
+          <FiFilter size={20} />
         </button>
+        {showSort && (
+          <div
+            ref={sortRef}
+            className="absolute right-0 top-12 z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-64"
+          >
+            <div className="mb-2">
+              <label className="block text-xs font-semibold mb-1">Sort By</label>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value)}
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                <option value="Date Added">Date Added</option>
+                <option value="Loan Date">Loan Date</option>
+                <option value="Name">Name</option>
+              </select>
+            </div>
+            <div className="mb-2">
+              <label className="block text-xs font-semibold mb-1">Status</label>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Overdue">Overdue</option>
+                <option value="Closed">Closed</option>
+                <option value="No Loan">No Loan</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1">Validity</label>
+              <select
+                value={validityFilter}
+                onChange={e => setValidityFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                <option value="All">All Validity</option>
+                <option value="6">6 Months</option>
+                <option value="12">12 Months</option>
+              </select>
+            </div>
+            <button
+              onClick={exportToExcel}
+              className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm"
+            >
+              Export
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -229,10 +272,9 @@ export const Customers: React.FC = () => {
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <table className="w-full table-fixed">
-            {/* --- MODIFIED --- Actions column removed and widths adjusted */}
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="w-1/4 px-4 py-3 text-left text-sm font-semibold text-gray-900">Loan No</th>
+                <th className="w-1/4 px-4 py-3 text-left text-sm font-semibold text-gray-900">Ln.No</th>
                 <th className="w-1/6 px-4 py-3 text-center text-sm font-semibold text-gray-900">Profile</th>
                 <th className="w-1/3 px-4 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
                 <th className="w-1/4 px-4 py-3 text-center text-sm font-semibold text-gray-900">Status</th>
@@ -245,7 +287,6 @@ export const Customers: React.FC = () => {
                   onClick={() => handleCustomerClick(customer)}
                   className="hover:bg-blue-50 cursor-pointer transition"
                 >
-                  {/* --- MODIFIED --- This cell now shows the loan number OR a delete button */}
                   <td className="px-4 py-3 text-sm text-gray-800">
                     {customer.loan_id ? (
                       <span className="truncate" title={customer.loan_no || ''}>
@@ -257,7 +298,7 @@ export const Customers: React.FC = () => {
                         className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
                         title="Delete Customer"
                       >
-                        Delete 
+                        Delete
                       </button>
                     )}
                   </td>
@@ -289,7 +330,6 @@ export const Customers: React.FC = () => {
                       <span className="sm:hidden">{getStatusAbbreviation(customer.loan_status || 'No Loan')}</span>
                     </span>
                   </td>
-                  {/* --- REMOVED --- The separate Actions cell is gone */}
                 </tr>
               ))}
             </tbody>

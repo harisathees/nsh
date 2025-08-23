@@ -147,88 +147,108 @@ export const useJewels = (loanId?: string) => {
 
 
 export interface DashboardStats {
-  activeLoans: number
-  totalAmountLoaned: number
-  closedLoans: number
-  overdueLoans: number
-  interestEarned: number
-  pendingPayments: number
-  goldRate: number
-  silverRate: number
+  // Loan Counts
+  totalLoansCount: number;
+  activeLoansCount: number;
+  closedLoansCount: number;
+  overdueLoansCount: number;
+
+  // Principal Amounts
+  totalPrincipal: number;
+  activePrincipal: number;
+  closedPrincipal: number;
+  overduePrincipal: number;
+
+  // Interest Amounts (this is a simplified calculation, adjust as needed)
+  totalInterest: number;
+  collectedInterest: number; // Assuming interest from closed loans is collected
+  pendingInterest: number;   // Assuming interest from active loans is pending
+  overdueInterest: number;   // Assuming interest from overdue loans is overdue
 }
 
 export function useDashboardStats() {
   const [stats, setStats] = useState<DashboardStats>({
-    activeLoans: 0,
-    totalAmountLoaned: 0,
-    closedLoans: 0,
-    overdueLoans: 0,
-    interestEarned: 0,
-    pendingPayments: 0,
-    goldRate: 9002,
-    silverRate: 129
-  })
-  const [loading, setLoading] = useState(true)
+    totalLoansCount: 0,
+    activeLoansCount: 0,
+    closedLoansCount: 0,
+    overdueLoansCount: 0,
+    totalPrincipal: 0,
+    activePrincipal: 0,
+    closedPrincipal: 0,
+    overduePrincipal: 0,
+    totalInterest: 0,
+    collectedInterest: 0,
+    pendingInterest: 0,
+    overdueInterest: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
+  // TODO: Implement date filtering logic here based on a time period state
+  // For example: const [timePeriod, setTimePeriod] = useState('Month');
   const fetchStats = async () => {
     try {
+      setLoading(true);
       const { data: loans, error } = await supabase
         .from('loans')
-        .select('*')
+        .select('*');
 
-      if (error) throw error
+      if (error) throw error;
+      if (!loans) return;
 
-      const activeLoans = loans?.filter(loan => loan.status === 'Active').length || 0
-      const closedLoans = loans?.filter(loan => loan.status === 'Closed').length || 0
-      const overdueLoans = loans?.filter(loan => loan.status === 'Overdue').length || 0
+      // Filter loans by status
+      const activeLoans = loans.filter(loan => loan.status === 'Active');
+      const closedLoans = loans.filter(loan => loan.status === 'Closed');
+      const overdueLoans = loans.filter(loan => loan.status === 'Overdue');
       
-      const totalAmountLoaned = loans?.reduce((sum, loan) => sum + (loan.amount || 0), 0) || 0
-      const interestEarned = loans?.reduce((sum, loan) => {
-        const rate = loan.interest_rate || 0
-        const amount = loan.amount || 0
-        return sum + (amount * rate / 100)
-      }, 0) || 0
-      
-      const pendingPayments = loans?.filter(loan => loan.status === 'Active')
-        .reduce((sum, loan) => sum + (loan.amount || 0), 0) || 0
+      // Helper function to calculate interest for a loan
+      const calculateInterest = (loan: any) => (loan.amount || 0) * (loan.interest_rate || 0) / 100;
 
-      setStats({
-        activeLoans,
-        totalAmountLoaned,
-        closedLoans,
-        overdueLoans,
-        interestEarned,
-        pendingPayments,
-        goldRate: 9002,
-        silverRate: 129
-      })
+      // Calculate all stats
+      const newStats: DashboardStats = {
+        totalLoansCount: loans.length,
+        activeLoansCount: activeLoans.length,
+        closedLoansCount: closedLoans.length,
+        overdueLoansCount: overdueLoans.length,
+        
+        totalPrincipal: loans.reduce((sum, loan) => sum + (loan.amount || 0), 0),
+        activePrincipal: activeLoans.reduce((sum, loan) => sum + (loan.amount || 0), 0),
+        closedPrincipal: closedLoans.reduce((sum, loan) => sum + (loan.amount || 0), 0),
+        overduePrincipal: overdueLoans.reduce((sum, loan) => sum + (loan.amount || 0), 0),
+        
+        collectedInterest: closedLoans.reduce((sum, loan) => sum + calculateInterest(loan), 0),
+        pendingInterest: activeLoans.reduce((sum, loan) => sum + calculateInterest(loan), 0),
+        overdueInterest: overdueLoans.reduce((sum, loan) => sum + calculateInterest(loan), 0),
+        totalInterest: 0 // This will be calculated below
+      };
+      
+      newStats.totalInterest = newStats.collectedInterest + newStats.pendingInterest;
+
+      setStats(newStats);
+
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      console.error('Error fetching stats:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchStats()
+    fetchStats();
 
-    // Subscribe to real-time changes
     const channel = supabase
       .channel('loans-changes')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'loans' },
-        () => {
-          fetchStats()
-        }
+        () => fetchStats()
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
+      supabase.removeChannel(channel);
+    };
+  }, []); // TODO: Add timePeriod to dependency array when implemented
 
-  return { stats, loading, refetch: fetchStats }
+  return { stats, loading, refetch: fetchStats };
 }
 
 export function useRecentLoans() {
