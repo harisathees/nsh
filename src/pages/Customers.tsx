@@ -58,7 +58,9 @@ export const Customers: React.FC = () => {
       if (error) throw error;
 
       const customersWithLoans = data?.map((customer) => {
-        const mostRecentLoan = customer.loans?.[0];
+        const sortedLoans = customer.loans?.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        const mostRecentLoan = sortedLoans?.[0];
+
         const calculatedStatus = mostRecentLoan
           ? calculateLoanStatus(
               mostRecentLoan.date,
@@ -90,6 +92,29 @@ export const Customers: React.FC = () => {
       navigate(`/view-pledge/${customer.loan_id}`);
     } else {
       alert('This customer has no active loans');
+    }
+  };
+
+  const handleDeleteCustomer = async (e: React.MouseEvent, customerId: string) => {
+    e.stopPropagation();
+
+    const isConfirmed = window.confirm('Are you sure you want to delete this customer? This will permanently remove their record.');
+
+    if (isConfirmed) {
+      try {
+        const { error } = await supabase
+          .from('customers')
+          .delete()
+          .eq('id', customerId);
+
+        if (error) throw error;
+
+        alert('Customer deleted successfully!');
+        setCustomers(prevCustomers => prevCustomers.filter(cust => cust.id !== customerId));
+      } catch (error) {
+        console.error('Error deleting customer:', error);
+        alert('Failed to delete the customer. Please try again.');
+      }
     }
   };
 
@@ -148,11 +173,10 @@ export const Customers: React.FC = () => {
           </h1>
           <p className="text-gray-600 mt-1">Manage your customers and their loans</p>
         </div>
-        
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 mb-4">
         <input
           type="text"
           placeholder="Search name / phone / address"
@@ -160,7 +184,6 @@ export const Customers: React.FC = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
         />
-
         <input
           type="text"
           placeholder="Search by Loan No"
@@ -168,7 +191,6 @@ export const Customers: React.FC = () => {
           onChange={(e) => setLoanNoSearch(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
         />
-
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -178,22 +200,8 @@ export const Customers: React.FC = () => {
           <option value="Active">Active</option>
           <option value="Overdue">Overdue</option>
           <option value="Closed">Closed</option>
-          {/* <option value="No Loan">No Loan</option> */}
+          <option value="No Loan">No Loan</option>
         </select>
-
-        {/* <select
-          value={validityFilter}
-          onChange={(e) => setValidityFilter(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-        >
-          <option value="All">All Validities</option>
-          {[...Array(12)].map((_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {i + 1} month{(i + 1 > 1 ? 's' : '')}
-            </option>
-          ))}
-        </select> */}
-
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
@@ -207,7 +215,7 @@ export const Customers: React.FC = () => {
           onClick={exportToExcel}
           className="bg-green-600 hover:bg-green-700 text-white px-2 py-3 rounded-lg text-sm"
         >
-           Export to Excel
+            Export 
         </button>
       </div>
 
@@ -221,12 +229,13 @@ export const Customers: React.FC = () => {
       ) : (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <table className="w-full table-fixed">
+            {/* --- MODIFIED --- Actions column removed and widths adjusted */}
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="w-1/4 px-4 py-3 text-left text-sm font-semibold text-gray-900">Loan No</th>
                 <th className="w-1/6 px-4 py-3 text-center text-sm font-semibold text-gray-900">Profile</th>
-                <th className="w-2/5 px-4 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
-                <th className="w-1/5 px-4 py-3 text-center text-sm font-semibold text-gray-900">Status</th>
+                <th className="w-1/3 px-4 py-3 text-left text-sm font-semibold text-gray-900">Name</th>
+                <th className="w-1/4 px-4 py-3 text-center text-sm font-semibold text-gray-900">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -236,8 +245,21 @@ export const Customers: React.FC = () => {
                   onClick={() => handleCustomerClick(customer)}
                   className="hover:bg-blue-50 cursor-pointer transition"
                 >
-                  <td className="px-4 py-3 text-sm text-gray-800 truncate" title={customer.loan_no || 'N/A'}>
-                    {customer.loan_no || 'N/A'}
+                  {/* --- MODIFIED --- This cell now shows the loan number OR a delete button */}
+                  <td className="px-4 py-3 text-sm text-gray-800">
+                    {customer.loan_id ? (
+                      <span className="truncate" title={customer.loan_no || ''}>
+                        {customer.loan_no}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => handleDeleteCustomer(e, customer.id)}
+                        className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                        title="Delete Customer"
+                      >
+                        Delete 
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 mx-auto">
@@ -267,6 +289,7 @@ export const Customers: React.FC = () => {
                       <span className="sm:hidden">{getStatusAbbreviation(customer.loan_status || 'No Loan')}</span>
                     </span>
                   </td>
+                  {/* --- REMOVED --- The separate Actions cell is gone */}
                 </tr>
               ))}
             </tbody>

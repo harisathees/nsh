@@ -32,20 +32,20 @@ export const LoanDetailsSection = ({
     }
   }, [jewelType]);
   useEffect(() => {
-  const estimated = totalNetWeight * metalRate * 0.8;
-  if (!isNaN(estimated)) {
-    onLoanDataChange({ ...loanData, estimated_amount: Math.round(estimated) });
-  }
-}, [totalNetWeight, metalRate]);
+    const estimated = totalNetWeight * metalRate * 0.8;
+    if (!isNaN(estimated)) {
+      onLoanDataChange({ ...loanData, estimated_amount: Math.round(estimated) });
+    }
+  }, [totalNetWeight, metalRate]);
 
-useEffect(() => {
-  if (loanData.date && loanData.validity_months) {
-    const date = new Date(loanData.date);
-    date.setMonth(date.getMonth() + Number(loanData.validity_months));
-    const dueDateStr = date.toISOString().split("T")[0];
-    onLoanDataChange({ ...loanData, duedate: dueDateStr });
-  }
-}, [loanData.date, loanData.validity_months]);
+  useEffect(() => {
+    if (loanData.date && loanData.validity_months) {
+      const date = new Date(loanData.date);
+      date.setMonth(date.getMonth() + Number(loanData.validity_months));
+      const dueDateStr = date.toISOString().split("T")[0];
+      onLoanDataChange({ ...loanData, duedate: dueDateStr });
+    }
+  }, [loanData.date, loanData.validity_months]);
 
 
 
@@ -74,6 +74,9 @@ useEffect(() => {
           <div className="flex flex-col gap-4">
             {formFields.map((field) => (
               <div key={field.id} className="relative">
+                <label className="block mb-5 text-sm font-medium text-black-700 px-2">
+                    {field.label}{field.required ? " *" : ""}
+                  </label>
                 {field.type === "select" ? (
                   <select
                     id={field.id}
@@ -94,8 +97,8 @@ useEffect(() => {
                     {(field.id === "interest_rate" && jewelType === "Silver")
                       ? [<option key="5" value="5">5</option>]
                       : field.options?.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
                   </select>
                 ) : (
                   <Input
@@ -111,9 +114,8 @@ useEffect(() => {
                       }
                       handleInputChange(field.id as keyof LoanData, value);
                     }}
-                    className={`h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] ${
-                      field.required ? "border-[#269AD4]" : "border-[#269AD4]"
-                    } focus:border-[#269AD4]`}
+                    className={`h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] ${field.required ? "border-[#269AD4]" : "border-[#269AD4]"
+                      } focus:border-[#269AD4]`}
                     required={field.required}
                   />
                 )}

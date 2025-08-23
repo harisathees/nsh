@@ -49,14 +49,15 @@ export const CustomerDetailsSection = ({ customer }: CustomerDetailsSectionProps
               />
             </div>
           </div>
-          <div className="flex flex-col gap-1 text-right">
+          {/* <div className="flex flex-col gap-1 text-right">
             <span className="text-sm font-medium text-yellow-600 bg-yellow-50 px-2 py-1 rounded-full">
               G: ₹9,849
             </span>
             <span className="text-sm font-medium text-teal-600 bg-teal-50 px-2 py-1 rounded-full">
               S: ₹116.04
             </span>
-          </div>
+          </div> */}
+          
         </div>
       </CardHeader>
       

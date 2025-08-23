@@ -183,9 +183,12 @@ export const CustomerDetailsSection = ({
             <div className="space-y-4">
               {formFields.map((field) => (
                 <div key={field.id} className="relative">
+                  <label className="block mb-5 text-sm font-medium text-black-700 px-2">
+                    {field.label}{field.required ? " *" : ""}
+                  </label>
                   {field.type === "input" ? (
                     <Input
-                      placeholder={`${field.label}${field.required ? ' *' : ''}`}
+                      placeholder={field.label}
                       value={field.value || ""}
                       onChange={(e) => handleInputChange(field.id as keyof CustomerData, e.target.value)}
                       className={`h-[50px] px-4 py-3 rounded-[30px] border border-solid focus:ring-2 focus:ring-[#fff5c5] ${field.required ? 'border-[#269AD4]' : 'border-[#269AD4]'
@@ -194,7 +197,7 @@ export const CustomerDetailsSection = ({
                     />
                   ) : (
                     <Textarea
-                      placeholder={`${field.label}${field.required ? ' *' : ''}`}
+                      placeholder={field.label}
                       value={field.value || ""}
                       onChange={(e) => handleInputChange(field.id as keyof CustomerData, e.target.value)}
                       className="min-h-[100px] px-4 py-3 rounded-[30px] border border-solid border-[#269AD4] focus:ring-2 focus:ring-[#fff5c5] focus:border-[#269AD4] resize-none"
@@ -202,6 +205,7 @@ export const CustomerDetailsSection = ({
                   )}
                 </div>
               ))}
+
               <div className="flex flex-col gap-1 ">
                 <label className="font-medium px-4">ID Proof</label>
                 <div className="flex gap-2 px-0 ">
@@ -279,12 +283,12 @@ export const CustomerDetailsSection = ({
                             >
                               Camera
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => photoInputRef.current?.click()}
                               className="px-3 py-1 bg-gray-500 text-white text-xs rounded-full hover:bg-gray-600"
                             >
                               Gallery
-                            </button>
+                            </button> */}
                           </div>
                         </>
                       )}
@@ -347,12 +351,12 @@ export const CustomerDetailsSection = ({
                             >
                               Record
                             </button>
-                            <button
+                            {/* <button
                               onClick={() => audioInputRef.current?.click()}
                               className="px-3 py-1 bg-gray-500 text-white text-xs rounded-full hover:bg-gray-600"
                             >
                               Upload
-                            </button>
+                            </button> */}
                           </div>
                         </>
                       )}

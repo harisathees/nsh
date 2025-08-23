@@ -22,9 +22,9 @@ export function StatsCard({
   const formatValue = (val: string | number) => {
     if (typeof val === 'number') {
       if (val >= 100000) {
-        return `₹${(val / 100000).toFixed(1)}L`
+        return `₹${(val / 1).toFixed(0)}`
       } else if (val >= 1000) {
-        return `₹${(val / 1000).toFixed(1)}K`
+        return `₹${(val / 1).toFixed(0)}`
       } else if (title.toLowerCase().includes('amount') || title.toLowerCase().includes('earned') || title.toLowerCase().includes('payment')) {
         return `₹${val.toLocaleString()}`
       }

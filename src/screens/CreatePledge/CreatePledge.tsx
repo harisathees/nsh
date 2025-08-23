@@ -66,7 +66,7 @@ export const CreatePledge = (): JSX.Element => {
     type: '',
     quality: '',
     description: '',
-    pieces: 1,
+    pieces: 0,
     weight: 0,
     stone_weight: 0,
     net_weight: 0,
@@ -225,7 +225,7 @@ export const CreatePledge = (): JSX.Element => {
 
         <div className="text-center mb-8 mt-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Pledge</h1>
-          <p className="text-gray-600">Enter customer and loan details to create a new pledge</p>
+          <p className="text-gray-600">Enter customer, jewel and loan details to create a new pledge</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">

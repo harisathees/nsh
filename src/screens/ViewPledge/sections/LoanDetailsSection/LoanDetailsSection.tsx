@@ -54,6 +54,7 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
       </CardHeader>
       
       <CardContent className="p-6">
+        
         {/* Form Fields */}
         <div className="space-y-4 mb-6">
           {loanFields.map((field) => (

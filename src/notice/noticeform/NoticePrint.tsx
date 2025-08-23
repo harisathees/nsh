@@ -79,11 +79,13 @@ const NoticePrint = () => {
         name: customer?.name,
         address: customer?.address,
         phone: customer?.mobile_no,
+        whatsapp: customer?.whatsapp_no,
         date: formatDate(loan.date),
         duedate: formatDate(loan.duedate),
         weight: jewel?.net_weight,
         interest: loan?.interest_rate,
         jewelName: jewel?.description || 'N/A',
+        faults: jewel?.faults || 'N/A',
         quality: jewel?.quality || 'N/A',
         count: jewel?.pieces || 1,
         itemNo: loan.loan_no,
@@ -100,37 +102,85 @@ const NoticePrint = () => {
     fetchData();
   }, [loanId]);
 
-  const handleShare = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
-    try {
-      if (!ref.current) return;
-      const dataUrl = await htmlToImage.toPng(ref.current, { quality: 1 });
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+const handleShare = async (ref: React.RefObject<HTMLDivElement>, filename: string) => {
+  try {
+    if (!ref.current) return;
+
+    // Define a scale factor for high-resolution output
+    const scale = 3; // Increase for higher quality (300 DPI from 96 DPI is ~3.1)
+
+    const dataUrl = await htmlToImage.toPng(ref.current, {
+      quality: 1, // Quality for PNG is about compression, not resolution
+      
+      // --- MODIFIED ---
+      // Use pixelRatio to render at a higher resolution
+      pixelRatio: scale, 
+
+      // This helps ensure external images are re-fetched and not missed
+      cacheBust: true, 
+    });
+
+    if (isMobile && navigator.canShare) {
+      // Mobile share logic (remains the same)
       const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], filename, { type: 'image/png' });
+      const file = new File([blob], filename, { type: "image/png" });
+      await navigator.share({
+        files: [file],
+        title: "Loan Notice",
+        text: "Please find the notice attached",
+      });
+    } else {
+      // Desktop print logic (remains the same)
+      const iframe = document.createElement("iframe");
+      iframe.id = "print-frame";
+      iframe.style.position = "fixed";
+      iframe.style.right = "0";
+      iframe.style.bottom = "0";
+      iframe.style.width = "0";
+      iframe.style.height = "0";
+      iframe.style.border = "0";
+      document.body.appendChild(iframe);
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Loan Notice',
-          text: 'Please find the notice attached',
-        });
-      } else {
-        alert('Sharing not supported on this device/browser');
+      const doc = iframe.contentWindow?.document;
+      if (doc) {
+        doc.open();
+        doc.write(`
+          <html>
+          <head>
+            <title>${filename}</title>
+            <style>
+              @page { size: A4; margin: 0; }
+              body { margin: 0; display: flex; justify-content: center; align-items: center; }
+              img { width: 210mm; height: 297mm; object-fit: contain; }
+            </style>
+          </head>
+          <body>
+            <img src="${dataUrl}" />
+            <script>
+              window.onload = function() {
+                window.print();
+              };
+              window.onafterprint = function() {
+                parent.document.body.removeChild(parent.document.querySelector("#print-frame"));
+              };
+            </script>
+          </body>
+          </html>
+        `);
+        doc.close();
       }
-    } catch (error) {
-      console.error('Error sharing:', error);
     }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading print notice...</p>
-        </div>
-      </div>
-    );
+  } catch (error) {
+    console.error("Error handling share/print:", error);
   }
+};
+
+
+
+  if (loading || !data) return <p>Loading...</p>;
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', margin: '20px 0' }}>
@@ -163,7 +213,7 @@ const NoticePrint = () => {
         {data.jewelImage && (
           <div style={{
             position: 'absolute',
-            top: '119mm',
+            top: '120mm',
             left: '179mm',
             width: '26mm',
             height: '33mm',
@@ -215,7 +265,7 @@ const NoticePrint = () => {
             left: field.left,
             transform: 'rotate(90deg)',
             transformOrigin: 'left top',
-            fontSize: '14px',
+            fontSize: '15px',
             zIndex: 1,
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -245,30 +295,42 @@ const buttonStyle = (bg: string) => ({
   fontWeight: 'bold',
 });
 
+
+
 const fields = (data: any) => [
-  { top: '117.5mm', left: '197mm', label: `Date:${data.date}` },
-  { top: '117.5mm', left: '190mm', label: `Due:${data.duedate}` },
-  { top: '2.5mm', left: '198mm', label: `Gold:${data.goldRate}` },
-  { top: '2.5mm', left: '193mm', label: `Silver:${data.silverRate}` },
-  { top: '2.5mm', left: '180mm', label: `கடன் எண்:${data.itemNo}` },
-  { top: '2.5mm', left: '172mm', label: `தரம்:${data.quality}` },
-  { top: '2.5mm', left: '165mm', label: `Pcs: ${data.count}` },
-  { top: '2.5mm', left: '158mm', label: `வட்டி: ${data.interest}%` },
-  { top: '2.5mm', left: '150mm', label: `பொருள்: ${data.jewelName}` },
-  { top: '2.5mm', left: '143mm', label: `முகவரி: ${data.address}` },
+  //of
+  { top: '100.5mm', left: '201mm', label: `Date:${data.date}` },
+  { top: '100.5mm', left: '196mm', label: `Due :${data.duedate}` },
+  { top: '100.5mm', left: '188mm', label: `G:${data.goldRate}` },
+  { top: '121.5mm', left: '188mm', label: `S:${data.silverRate}` },
+  { top: '2.5mm', left: '188mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+  { top: '2.5mm', left: '181mm', label: `கடன் எண்:${data.itemNo}` },
+  { top: '2.5mm', left: '174mm', label: `தரம்:${data.quality}` },
+  { top: '2.5mm', left: '167mm', label: `Pcs: ${data.count}` },
+  { top: '2.5mm', left: '160mm', label: `வட்டி: ${data.interest}%` },
+  { top: '2.5mm', left: '153mm', label: `Faults: ${data.faults}` },
+  { top: '2.5mm', left: '146mm', label: `பொருள்: ${data.jewelName}` },
+  { top: '2.5mm', left: '139mm', label: `முகவரி: ${data.address}` },
   { top: '44mm', left: '180mm', label: `பெயர்: ${data.name}` },
   { top: '44mm', left: '172mm', label: `தொகை: ₹${data.amount}/-` },
   { top: '44mm', left: '164mm', label: `எடை: ${data.weight}g` },
-  { top: '117.5mm', left: '97mm', label: `Date:${data.date}` },
-  { top: '117.5mm', left: '90mm', label: `Due:${data.duedate}` },
-  { top: '2.5mm', left: '90mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+  { top: '44mm', left: '156mm', label: ` ${data.phone},${data.whatsapp}` },
+
+  //cc
+  
+  { top: '100.5mm', left: '95mm', label: `Date:${data.date}` },
+  { top: '100.5mm', left: '90mm', label: `Due :${data.duedate}` },
+  { top: '2.5mm', left: '80mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
   { top: '2.5mm', left: '70mm', label: `கடன் எண்:${data.itemNo}` },
   { top: '2.5mm', left: '62mm', label: `Pcs: ${data.count}` },
   { top: '2.5mm', left: '54mm', label: `வட்டி: ${data.interest}%` },
   { top: '2.5mm', left: '46mm', label: `பொருள்: ${data.jewelName}` },
+  { top: '2.5mm', left: '38mm', label: `Faults: ${data.faults}` },
   { top: '44mm', left: '70mm', label: `பெயர்: ${data.name}` },
   { top: '44mm', left: '62mm', label: `தொகை: ₹${data.amount}/-` },
   { top: '44mm', left: '54mm', label: `எடை: ${data.weight}g` },
+  { top: '44mm', left: '46mm', label: ` ${data.phone},${data.whatsapp}` },
+
 ];
 
 export default NoticePrint;
