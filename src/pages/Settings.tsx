@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
+import { supabase } from '../lib/supabase';
 import {
   Settings as SettingsIcon,
   Database,
@@ -7,137 +10,180 @@ import {
   Shield,
   Bell,
   Coins,
+  Loader2,
+  Save,
+  CheckCircle,
+  AlertTriangle,
 } from 'lucide-react';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { supabase } from '../lib/supabase';
+import { cn } from '../lib/utils';
 
-export function Settings() {
+const settingsSections = [
+  { id: 'metal_rates', title: 'Metal Rates', description: 'Update daily Gold and Silver rates.', icon: <Coins className="w-5 h-5" /> },
+  { id: 'general', title: 'General', description: 'Basic application configuration.', icon: <SettingsIcon className="w-5 h-5" /> },
+  { id: 'user_management', title: 'User Management', description: 'Manage user roles and permissions.', icon: <Users className="w-5 h-5" /> },
+];
+
+// --- Metal Rates Panel Component (MODIFIED) ---
+const MetalRatesPanel = () => {
+  const [initialRates, setInitialRates] = useState({ gold: '', silver: '' });
   const [goldRate, setGoldRate] = useState('');
   const [silverRate, setSilverRate] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const hasChanges = goldRate !== initialRates.gold || silverRate !== initialRates.silver;
 
   useEffect(() => {
     const fetchRates = async () => {
+      setLoading(true);
       const { data } = await supabase.from('metal_rates').select('*');
-      const gold = data?.find((r) => r.metal_type === 'Gold');
-      const silver = data?.find((r) => r.metal_type === 'Silver');
-      setGoldRate(gold?.rate || '');
-      setSilverRate(silver?.rate || '');
+      const gold = data?.find((r) => r.metal_type === 'Gold')?.rate || '';
+      const silver = data?.find((r) => r.metal_type === 'Silver')?.rate || '';
+      setGoldRate(gold);
+      setSilverRate(silver);
+      setInitialRates({ gold, silver });
       setLoading(false);
     };
     fetchRates();
   }, []);
+  
+  const handleSave = async () => {
+    if (!goldRate || !silverRate) {
+        setStatusMessage({ type: 'error', text: 'Rates cannot be empty.' });
+        return;
+    }
 
-  const updateRate = async (metal: 'Gold' | 'Silver', rate: string) => {
-    await supabase
-      .from('metal_rates')
-      .update({ rate: parseFloat(rate), updated_at: new Date() })
-      .eq('metal_type', metal);
-    alert(`${metal} rate updated!`);
+    setSaving(true);
+    setStatusMessage(null);
+
+    const updates = [
+        supabase.from('metal_rates').update({ rate: parseFloat(goldRate), updated_at: new Date() }).eq('metal_type', 'Gold'),
+        supabase.from('metal_rates').update({ rate: parseFloat(silverRate), updated_at: new Date() }).eq('metal_type', 'Silver'),
+    ];
+
+    const results = await Promise.all(updates);
+    const hasError = results.some(res => res.error);
+
+    if (hasError) {
+        setStatusMessage({ type: 'error', text: 'Error saving rates. Please try again.' });
+        console.error(results.find(res => res.error)?.error);
+    } else {
+        setStatusMessage({ type: 'success', text: 'Rates saved successfully!' });
+        setInitialRates({ gold: goldRate, silver: silverRate }); // Update initial state
+    }
+
+    setSaving(false);
+    setTimeout(() => setStatusMessage(null), 3000); // Hide message after 3 seconds
   };
 
-  const settingsSections = [
-    {
-      title: 'Metal Rate Settings',
-      description: 'Update daily Gold and Silver rates',
-      icon: <Coins className="w-8 h-8 text-amber-500" />,
-    },
-    {
-      title: 'General Settings',
-      description: 'Basic application configuration',
-      icon: <SettingsIcon className="w-8 h-8 text-gray-500" />,
-    },
-    {
-      title: 'User Management',
-      description: 'Manage user roles and permissions',
-      icon: <Users className="w-8 h-8 text-blue-500" />,
-    },
-    {
-      title: 'Database Settings',
-      description: 'Configure database connections and backups',
-      icon: <Database className="w-8 h-8 text-green-500" />,
-    },
-    {
-      title: 'Security Settings',
-      description: 'Authentication and security configurations',
-      icon: <Shield className="w-8 h-8 text-red-500" />,
-    },
-    {
-      title: 'Notifications',
-      description: 'Configure alerts and notification preferences',
-      icon: <Bell className="w-8 h-8 text-yellow-500" />,
-    },
-  ];
+
+  if (loading) {
+    return (
+        <div className="flex items-center justify-center p-12">
+            <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+        </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-6">
-      <nav className="flex items-center space-x-1 text-sm text-gray-500">
-        <span>Master Settings</span>
-      </nav>
-
-      <div className="flex items-center space-x-2 mb-6">
-        <SettingsIcon className="w-6 h-6 text-gray-600" />
-        <h1 className="text-2xl font-semibold text-gray-800">Master Settings</h1>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {settingsSections.map((section, index) => (
-          <Card
-            key={index}
-            className="border border-gray-200 rounded-2xl hover:shadow-md transition-shadow"
-          >
-            <CardContent className="p-6 space-y-4">
-              <div className="flex flex-col items-center text-center space-y-4">
-                <div>{section.icon}</div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                    {section.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm">{section.description}</p>
-                </div>
-              </div>
-
-              {section.title === 'Metal Rate Settings' && (
-                <>
-                  {loading ? (
-                    <p className="text-sm text-gray-500">Loading rates...</p>
-                  ) : (
-                    <div className="space-y-4 text-left">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Gold Rate (₹ per gram)
-                        </label>
-                        <div className="flex gap-2 mt-1">
-                          <Input
-                            type="number"
-                            value={goldRate}
-                            onChange={(e) => setGoldRate(e.target.value)}
-                          />
-                          <Button onClick={() => updateRate('Gold', goldRate)}>Update</Button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Silver Rate (₹ per gram)
-                        </label>
-                        <div className="flex gap-2 mt-1">
-                          <Input
-                            type="number"
-                            value={silverRate}
-                            onChange={(e) => setSilverRate(e.target.value)}
-                          />
-                          <Button onClick={() => updateRate('Silver', silverRate)}>Update</Button>
-                        </div>
-                      </div>
+    <Card className="rounded-2xl shadow-sm">
+        <CardHeader>
+            <CardTitle>Update Metal Rates</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Gold Rate (₹ per gram)</label>
+                <Input
+                    type="number"
+                    placeholder="e.g., 6500"
+                    value={goldRate}
+                    onChange={(e) => setGoldRate(e.target.value)}
+                    className="bg-slate-100 border-transparent focus:bg-white focus:border-indigo-500"
+                />
+            </div>
+            <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Silver Rate (₹ per gram)</label>
+                <Input
+                    type="number"
+                    placeholder="e.g., 80"
+                    value={silverRate}
+                    onChange={(e) => setSilverRate(e.target.value)}
+                    className="bg-slate-100 border-transparent focus:bg-white focus:border-indigo-500"
+                />
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
+                <Button onClick={handleSave} disabled={saving || !hasChanges} className="w-full sm:w-auto">
+                    {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2"/>}
+                    Save Changes
+                </Button>
+                {statusMessage && (
+                    <div className={`flex items-center gap-2 text-sm font-medium ${statusMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                        {statusMessage.type === 'success' ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
+                        <span>{statusMessage.text}</span>
                     </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+                )}
+            </div>
+        </CardContent>
+    </Card>
+  )
+}
+
+// --- Placeholder Panel Component ---
+const PlaceholderPanel = ({ title }: { title: string }) => (
+    <Card className="rounded-2xl shadow-sm">
+        <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
+        <CardContent className="text-center py-16 text-slate-500">
+            <p>Settings for {title} will be available here.</p>
+        </CardContent>
+    </Card>
+);
+
+
+// --- Main Settings Page Component ---
+export function Settings() {
+    const [activeSection, setActiveSection] = useState('metal_rates');
+
+    const renderContent = () => {
+        switch (activeSection) {
+            case 'metal_rates': return <MetalRatesPanel />;
+            case 'general': return <PlaceholderPanel title="General Settings" />;
+            case 'user_management': return <PlaceholderPanel title="User Management" />;
+            default: return <MetalRatesPanel />;
+        }
+    };
+    
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-6xl mx-auto p-4 sm:p-6">
+        <header className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-800">Settings</h1>
+            <p className="text-slate-500 mt-1">Manage your application and account settings.</p>
+        </header>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <aside className="md:col-span-1">
+                <nav className="space-y-1">
+                    {settingsSections.map((section) => (
+                        <button
+                            key={section.id}
+                            onClick={() => setActiveSection(section.id)}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                                activeSection === section.id ? 'bg-indigo-100 text-indigo-700' : 'text-slate-600 hover:bg-slate-100'
+                            )}
+                        >
+                            {section.icon}
+                            <span>{section.title}</span>
+                        </button>
+                    ))}
+                </nav>
+            </aside>
+
+            <main className="md:col-span-3">
+                {renderContent()}
+            </main>
+        </div>
       </div>
     </div>
   );

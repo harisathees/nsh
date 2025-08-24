@@ -217,15 +217,15 @@ export const CreatePledge = (): JSX.Element => {
     <div className="min-h-screen bg-gray-50 py-6">
       <div className="container mx-auto px-4">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/pledge-entry')}
           className="h-10 px-4 rounded-xl border border-gray-300 hover:bg-gray-50 bg-white text-gray-700 font-medium transition-colors"
         >
-          ← Back to Dashboard
+          ← Back to New pledge
         </button>
 
         <div className="text-center mb-8 mt-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Pledge</h1>
-          <p className="text-gray-600">Enter customer, jewel and loan details to create a new pledge</p>
+          {/* <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Pledge</h1> */}
+          {/* <p className="text-gray-600">Enter customer, jewel and loan details to create a new pledge</p> */}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
