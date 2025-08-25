@@ -7,6 +7,23 @@ import { LoanDetailsSection } from './sections/LoanDetailsSection/LoanDetailsSec
 import { Button } from '../../components/ui/button';
 import { SaveIcon, Loader2 } from 'lucide-react';
 
+// You can place this component definition at the top of your file
+const GoldCoinSpinner: React.FC<{ text?: string }> = ({ text = "Loading pledge data..." }) => (
+  <div className="flex flex-col items-center justify-center py-20" aria-label="Loading">
+    <svg className="coin-spinner w-16 h-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gold_gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%" style={{ stopColor: '#FEF08A' }} />
+          <stop offset="100%" style={{ stopColor: '#FBBF24' }} />
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="48" fill="url(#gold_gradient)" stroke="#B45309" strokeWidth="4"/>
+      <text x="50" y="68" textAnchor="middle" fontSize="48" fill="#B45309" fontWeight="bold">₹</text>
+    </svg>
+    <p className="mt-4 text-sm font-semibold text-amber-800">{text}</p>
+  </div>
+);
+
 export interface CustomerData {
   id: string;
   name: string;
@@ -248,15 +265,12 @@ export const EditPledge = (): JSX.Element => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading pledge data...</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <GoldCoinSpinner text="Loading pledge data..." />
+    </div>
+  );
+}
 
   if (error) {
     return (

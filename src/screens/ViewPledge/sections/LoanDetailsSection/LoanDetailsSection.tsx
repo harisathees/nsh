@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader } from "../../../../components/ui/card";
 import { Input } from "../../../../components/ui/input";
 import { formatCurrency, formatDate, getStatusColor } from "../../../../lib/loanUtils";
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react'; // Make sure to import the new icon
+
 
 interface LoanDetailsSectionProps {
   loan: Loan;
@@ -36,10 +38,10 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
       default:
         return 'bg-gradient-to-r from-gray-50 to-slate-50';
     }
-   
+
   };
- const navigate = useNavigate();
- const navigate1 = useNavigate();
+  const navigate = useNavigate();
+  const navigate1 = useNavigate();
   return (
     <Card className="w-full bg-white rounded-3xl shadow-lg overflow-hidden">
       <CardHeader className={`p-6 ${getHeaderGradient(loan.status)}`}>
@@ -52,9 +54,9 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
           </span>
         </div>
       </CardHeader>
-      
+
       <CardContent className="p-6">
-        
+
         {/* Form Fields */}
         <div className="space-y-4 mb-6">
           {loanFields.map((field) => (
@@ -75,7 +77,7 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
         {/* Action Buttons */}
         {loan.status !== 'Closed' && (
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
-          
+
             <Button
               onClick={() => navigate(`/edit-pledge/${loan.id}`)}
               variant="outline"
@@ -84,14 +86,13 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
               <PencilIcon className="w-4 h-4 mr-2" />
               Edit
             </Button>
-
             <Button
               onClick={() => navigate1(`/close-pledge/${loan.id}`)}
               variant="outline"
-              className="flex-1 h-12 bg-red-50 text-red-700 border-red-200 rounded-2xl hover:bg-red-100 hover:border-red-300 transition-colors duration-200"
+              className="flex-1 h-12 bg-green-50 text-green-700 border-green-200 rounded-2xl hover:bg-green-100 hover:border-green-300 transition-colors duration-200"
             >
-              <Trash2Icon className="w-4 h-4 mr-2" />
-              Close
+              <CheckCircle2 className="w-4 h-4 mr-2" />
+              Mark as Closed
             </Button>
           </div>
         )}

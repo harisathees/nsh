@@ -1,19 +1,31 @@
-import React from 'react';
-import { Card, CardContent } from '../ui/card';
-import { Separator } from '../ui/separator'; // Assuming you have a Separator component from shadcn/ui
+import React from 'react'
+import { Card, CardContent } from '../ui/card'
 
+// --- MODIFIED --- The color map now only controls the icon's styling ---
 const colorMap = {
-  total: 'text-blue-600 border-blue-200',
-  active: 'text-orange-600 border-orange-200',
-  closed: 'text-green-600 border-green-200',
-  overdue: 'text-red-600 border-red-200',
-};
+  total: {
+    iconBg: 'bg-blue-100',
+    iconText: 'text-blue-600',
+  },
+  active: {
+    iconBg: 'bg-orange-100',
+    iconText: 'text-orange-600',
+  },
+  closed: {
+    iconBg: 'bg-green-100',
+    iconText: 'text-green-600',
+  },
+  overdue: {
+    iconBg: 'bg-red-100',
+    iconText: 'text-red-600',
+  },
+}
 
 interface ConsolidatedStatsCardProps {
   title: string;
   icon: React.ReactNode;
-  principal: string;
-  interest: string;
+  principal: string; // e.g., "₹1,50,00,000"
+  interest: string;  // e.g., "₹5,00,000"
   count: number | string;
   status: 'total' | 'active' | 'closed' | 'overdue';
 }
@@ -29,32 +41,37 @@ export function ConsolidatedStatsCard({
   const colors = colorMap[status] || colorMap.total;
 
   return (
-    <Card className={`rounded-lg shadow-sm hover:shadow-md transition-shadow border-t-4 ${colors}`}>
+    // --- MODIFIED --- All cards now have the same neutral top border color ---
+    <Card className="rounded-xl shadow-sm hover:shadow-lg transition-shadow border-t-4 border-slate-200">
       <CardContent className="p-4">
-        {/* Header */}
-        <div className="flex items-center space-x-3 mb-3">
-          <div className={colors}>{icon}</div>
-          <h3 className="font-semibold text-gray-700">{title}</h3>
+        
+        <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${colors.iconBg} ${colors.iconText}`}>
+              {React.cloneElement(icon as React.ReactElement, { size: 18 })}
+            </div>
+            <h3 className="text-base font-semibold text-slate-600">{title}</h3>
+          </div>
+          <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+            {count} Loans
+          </span>
         </div>
 
-        {/* Main Value */}
-        <p className="text-3xl font-bold text-gray-800">{principal}</p>
-        <p className="text-sm text-gray-500">Principal Amount</p>
-
-        <Separator className="my-3" />
-
-        {/* Secondary Details */}
-        <div className="flex justify-between items-center text-sm">
-          <div>
-            <p className="text-gray-500">Interest</p>
-            <p className="font-semibold text-gray-700">{interest}</p>
+        <div className="grid grid-cols-2 gap-4 divide-x divide-slate-200">
+          
+          <div className="px-2 text-center">
+            <p className="text-xs text-slate-400 mb-1">Principal</p>
+            <p className="text-2xl font-bold text-slate-800">{principal}</p>
           </div>
-          <div>
-            <p className="text-gray-500">Loan Count</p>
-            <p className="font-semibold text-gray-700 text-right">{count}</p>
+          
+          <div className="px-2 text-center">
+            <p className="text-xs text-slate-400 mb-1">Interest</p>
+            <p className="text-2xl font-bold text-slate-800">{interest}</p>
           </div>
+          
         </div>
+
       </CardContent>
     </Card>
-  );
+  )
 }

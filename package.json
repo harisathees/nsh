@@ -20,18 +20,27 @@
     "@supabase/supabase-js": "^2.52.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+<<<<<<< HEAD
     "date-fns": "^4.1.0",
+=======
+    "framer-motion": "^12.23.12",
+>>>>>>> 7bb96b386d8e2501bdd77f74317c3166f1af74b6
     "html-to-image": "^1.11.13",
     "jspdf": "^3.0.1",
     "lucide-react": "^0.453.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
+<<<<<<< HEAD
+=======
+    "react-hook-form": "^7.62.0",
+>>>>>>> 7bb96b386d8e2501bdd77f74317c3166f1af74b6
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.30.1",
+    "react-to-print": "^3.1.1",
     "sonner": "^2.0.6",
-    "tailwind-merge": "^2.5.4",
+    "tailwind-merge": "^2.6.0",
     "xlsx": "^0.18.5",
     "zod": "^4.1.0"
   },
