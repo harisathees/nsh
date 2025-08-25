@@ -96,10 +96,6 @@ export function Dashboard() {
                     <RatesCard goldRate={rates.gold} silverRate={rates.silver} />
                 </div>
 
-<<<<<<< HEAD
-            {/* Secondary Grid: Rates and other potential cards */}
-            <div className="grid grid-cols-1  gap-6">
-=======
             <motion.div
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
               variants={containerVariants}
@@ -122,7 +118,6 @@ export function Dashboard() {
             </motion.div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
->>>>>>> 7bb96b386d8e2501bdd77f74317c3166f1af74b6
                 <div className="lg:col-span-2">
                     <h2 className="text-xl  text-slate-800 mb-4">Recent Loans</h2>
                     <RecentLoansTable loans={recentLoans} loading={loansLoading} />
