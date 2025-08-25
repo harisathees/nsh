@@ -1,68 +1,52 @@
 import React from 'react'
-import { TrendingUp, TrendingDown, ArrowUpRight } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
+
+// A map to associate status with colors for icons
+const colorMap = {
+  total: 'bg-blue-100 text-blue-600',
+  active: 'bg-orange-100 text-orange-600',
+  closed: 'bg-green-100 text-green-600',
+  overdue: 'bg-red-100 text-red-600',
+}
 
 interface StatsCardProps {
   title: string
-  value: string | number
-  percentage: string
-  trend: 'up' | 'down'
-  valueColor?: string
-  icon?: React.ReactNode
+  icon: React.ReactNode
+  amount: string            // The main, large value (e.g., currency)
+  count: number | string    // The secondary value (e.g., loan count)
+  secondaryLabel?: string   // A small label like "Principal Amount"
+  status: 'total' | 'active' | 'closed' | 'overdue'
 }
 
-export function StatsCard({ 
-  title, 
-  value, 
-  percentage, 
-  trend, 
-  valueColor = "text-blue-600",
-  icon 
+export function StatsCard({
+  title,
+  icon,
+  amount,
+  count,
+  secondaryLabel = "Principal Amount",
+  status,
 }: StatsCardProps) {
-  const formatValue = (val: string | number) => {
-    if (typeof val === 'number') {
-      if (val >= 100000) {
-        return `₹${(val / 1).toFixed(0)}`
-      } else if (val >= 1000) {
-        return `₹${(val / 1).toFixed(0)}`
-      } else if (title.toLowerCase().includes('amount') || title.toLowerCase().includes('earned') || title.toLowerCase().includes('payment')) {
-        return `₹${val.toLocaleString()}`
-      }
-      return val.toLocaleString()
-    }
-    return val
-  }
+  const colors = colorMap[status] || colorMap.total
 
   return (
-    <Card className="border border-gray-200 rounded-2xl hover:shadow-md transition-shadow">
+    <Card className="rounded-lg shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-sm font-medium text-gray-600 leading-tight">
-            {title}
-          </h3>
-          {icon || <ArrowUpRight className="w-5 h-5 text-gray-400" />}
+        {/* Top Row: Icon and Count */}
+        <div className="flex justify-between items-start mb-2">
+          <div className={`w-10 h-10 rounded-md flex items-center justify-center ${colors}`}>
+            {icon}
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-bold text-gray-700">{count}</p>
+            <p className="text-xs text-gray-400">Count</p>
+          </div>
         </div>
-
-        <div className="space-y-2">
-          <div className={`text-2xl font-bold ${valueColor}`}>
-            {formatValue(value)}
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
-              {trend === 'up' ? (
-                <TrendingUp className="w-4 h-4 text-green-500" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-red-500" />
-              )}
-              <span className={`text-xs font-semibold ${
-                trend === 'up' ? 'text-green-500' : 'text-red-500'
-              }`}>
-                {percentage}
-              </span>
-            </div>
-            <span className="text-xs text-gray-500">From last week</span>
-          </div>
+        
+        {/* Bottom Row: Title and Main Amount */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+          <p className="text-2xl font-bold text-gray-800">{amount}</p>
+          {secondaryLabel && <p className="text-xs text-gray-400">{secondaryLabel}</p>}
         </div>
       </CardContent>
     </Card>

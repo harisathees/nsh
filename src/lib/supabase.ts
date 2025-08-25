@@ -228,47 +228,59 @@ export type Database = {
 }
 
 
-//bank and repledge
-export interface Bank {
+//Re pledge
+
+export interface Loan {
   id: string;
-  bank_name: string;
-  jewel_details?: string;
-  jewel_name?: string;
-  pieces?: number;
-  gross_weight?: number;
-  stone_weight?: number;
-  net_weight?: number;
-  loan_no?: string;
-  date?: string;
-  amount?: number;
-  interest_rate?: number;
-  validity?: string;
-  invest?: number;
-  payment_method?: string;
-  repledge_interest?: number;
-  processing_fee?: number;
-  created_at?: string;
+  loan_no: string;
+  customer_id: string;
+  date: string;
+  amount: number;
+  interest_rate: number;
+  validity_months: number;
+  interest_taken: boolean;
+  payment_method: string;
+  processing_fee: number;
+  estimated_amount: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  duedate: string;
+  metal_rate: number;
+}
+
+export interface Jewel {
+  id: string;
+  loan_id: string;
+  type: string;
+  quality: string;
+  description: string;
+  pieces: number;
+  weight: number;
+  stone_weight: number;
+  net_weight: number;
+  faults: string;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RepledgeEntry {
   id: string;
-  bank_name?: string;
-  jewel_details?: string;
-  jewel_name?: string;
-  pieces?: number;
-  gross_weight?: number;
-  stone_weight?: number;
-  net_weight?: number;
-  loan_no?: string;
-  date?: string;
-  amount?: number;
-  interest_rate?: number;
-  validity?: string;
-  invest?: number;
-  payment_method?: string;
-  repledge_interest?: number;
-  processing_fee?: number;
-  created_at?: string;
+  loan_id: string;
+  loan_no: string;
+  re_no: string;
+  net_weight: number;
+  gross_weight: number;
+  stone_weight: number;
+  amount: number;
+  processing_fee: number;
+  bank_name: string;
+  interest_percent: number;
+  validity_period: number;
+  after_interest_percent: number;
+  payment_date: string;
+  due_date: string;
+  created_at: string;
+  updated_at: string;
 }
-
-export type RepledgeEntryInsert = Omit<RepledgeEntry, 'id' | 'created_at'>;
