@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// --- MODIFIED --- Assuming hooks also return an error state
 import { useDashboardStats, useRecentLoans } from '../hooks/useSupabase'; 
 import { supabase } from '../lib/supabase';
 import { ConsolidatedStatsCard } from '../components/dashboard/ConsolidatedStatsCard';
@@ -8,7 +7,7 @@ import { RecentLoansTable } from '../components/dashboard/RecentLoansTable';
 import { DollarSign, Clock, CheckCircle, AlertTriangle, AlertCircle as AlertIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-// --- ADDED --- New themed loading component
+// A themed loading component
 const GoldCoinSpinner: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-[60vh]" aria-label="Loading dashboard">
     <svg className="coin-spinner w-16 h-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +24,7 @@ const GoldCoinSpinner: React.FC = () => (
   </div>
 );
 
-// --- ADDED --- A component to display when data fetching fails
+// A component to display when data fetching fails
 const ErrorDisplay: React.FC<{ message?: string }> = ({ message = "Something went wrong." }) => (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <AlertIcon className="w-12 h-12 text-red-500 mb-4" />
@@ -39,7 +38,6 @@ const formatCurrency = (value: number) => {
 };
 
 export function Dashboard() {
-    // --- MODIFIED --- Assuming hooks return error state
     const { stats, loading: statsLoading, error: statsError } = useDashboardStats();
     const { loans: recentLoans, loading: loansLoading, error: loansError } = useRecentLoans();
     const [rates, setRates] = useState({ gold: 0, silver: 0 });
@@ -80,32 +78,22 @@ export function Dashboard() {
         return <GoldCoinSpinner />;
     }
 
-    // --- MODIFIED --- Added a crucial check for errors or missing data AFTER loading
     if (statsError || loansError || ratesError || !stats || !recentLoans) {
         return <ErrorDisplay message={statsError?.message || loansError?.message || ratesError?.message || "Failed to fetch required data."} />;
     }
 
     return (
         <div className="p-4 md:p-6 space-y-6 bg-slate-100 min-h-screen">
-            {/* <header>
-                <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
-                <p className="text-sm text-slate-500">Overview of all loan activities and metrics</p>
-            </header> */}
             <div className="lg:col-span-1">
-                    {/* <h2 className="text-xl font-bold text-slate-800 mb-4">Live Rates</h2> */}
-                    <RatesCard goldRate={rates.gold} silverRate={rates.silver} />
-                </div>
+                <RatesCard goldRate={rates.gold} silverRate={rates.silver} />
+            </div>
 
-<<<<<<< HEAD
-            {/* Secondary Grid: Rates and other potential cards */}
-            <div className="grid grid-cols-1  gap-6">
-=======
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
             >
                 <motion.div variants={itemVariants}>
                     <ConsolidatedStatsCard title="Total Portfolio" icon={<DollarSign size={24} />} principal={formatCurrency(stats.totalPrincipal)} interest={formatCurrency(stats.totalInterest)} count={stats.totalLoansCount} status="total" />
@@ -121,17 +109,11 @@ export function Dashboard() {
                 </motion.div>
             </motion.div>
             
-<<<<<<< HEAD
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-=======
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
->>>>>>> 7bb96b386d8e2501bdd77f74317c3166f1af74b6
->>>>>>> 26565b515b9bf063b47f54b2d064ca81edbbacaa
                 <div className="lg:col-span-2">
-                    <h2 className="text-xl  text-slate-800 mb-4">Recent Loans</h2>
+                    <h2 className="text-xl text-slate-800 mb-4">Recent Loans</h2>
                     <RecentLoansTable loans={recentLoans} loading={loansLoading} />
                 </div>
-                
             </div>
         </div>
     );
