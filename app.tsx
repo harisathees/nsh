@@ -15,6 +15,7 @@ import { MetalRatesSettings } from './src/pages/MetalRatesSettings';
 import { RedirectBasedOnAuth } from "./src/pages/RedirectBasedOnAuth";
 import { RepledgeEntryForm } from "./src/screens/RePledge/RepledgeEntryForm";
 import { BanksPage } from "./src/pages/BanksPage";
+import { RePledge } from "./src/screens/RePledge/RePledge";
 
 export default function App() {
   return (
@@ -37,8 +38,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<Reports />} />
-          <Route path="/re-pledge-entry/bank" element={<BanksPage />} />
-          <Route path="/re-pledge-entry/add" element={<RepledgeEntryForm />} />
+          <Route path="/re-pledge-entry/add" element={<RePledge />} />
           <Route path="/pledge-entry" element={<PledgeEntry />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/settings" element={<Settings />} />
