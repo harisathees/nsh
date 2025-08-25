@@ -60,13 +60,14 @@ export function ConsolidatedStatsCard({
         <div className="grid grid-cols-2 gap-4 divide-x divide-slate-200">
           
           <div className="px-2 text-center">
-            <p className="text-xs text-slate-400 mb-1">Principal</p>
+            
             <p className="text-2xl font-bold text-slate-800">{principal}</p>
+            <p className="text-xs text-slate-400 mb-1">Principal</p>
           </div>
           
           <div className="px-2 text-center">
-            <p className="text-xs text-slate-400 mb-1">Interest</p>
             <p className="text-2xl font-bold text-slate-800">{interest}</p>
+            <p className="text-xs text-slate-400 mb-1">Interest</p>
           </div>
           
         </div>
