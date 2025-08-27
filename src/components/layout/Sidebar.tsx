@@ -37,6 +37,7 @@ const navigation: NavigationItem[] = [
     icon: Landmark,
     children: [
       { name: 'Add Re-pledge', href: '/re-pledge-entry/add', icon: PlusCircle },
+      { name: 'Add Bank', href: '/re-pledge-entry/add-bank', icon: PlusCircle },
     ]
   },
   { name: 'Reports', href: '/reports', icon: FileText },
