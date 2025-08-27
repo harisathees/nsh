@@ -13,7 +13,7 @@ export const useRepledge = () => {
   const fetchLoanDetails = async (loanNo: string) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Fetch loan details
       const { data: loanData, error: loanError } = await supabase
@@ -54,7 +54,7 @@ export const useRepledge = () => {
           net_weight: totalNetWeight,
           gross_weight: totalGrossWeight,
           stone_weight: totalStoneWeight,
-        }
+        },
       };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -65,7 +65,7 @@ export const useRepledge = () => {
   };
 
   // Fetch repledge entries with pagination
-  const fetchRepledgeEntries = async (page: number = 1) => {
+  const fetchRepledgeEntries = async (page = currentPage) => {
     setLoading(true);
     setError(null);
 
@@ -107,7 +107,7 @@ export const useRepledge = () => {
 
       // Refresh the entries list
       await fetchRepledgeEntries(currentPage);
-      
+
       return data as RepledgeEntry;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error saving entry');
@@ -134,7 +134,7 @@ export const useRepledge = () => {
 
       // Refresh the entries list
       await fetchRepledgeEntries(currentPage);
-      
+
       return data as RepledgeEntry;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error updating entry');
@@ -159,7 +159,7 @@ export const useRepledge = () => {
 
       // Refresh the entries list
       await fetchRepledgeEntries(currentPage);
-      
+
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error deleting entry');
@@ -188,6 +188,7 @@ export const useRepledge = () => {
     }
   };
 
+  // UseEffect to fetch data only when the currentPage changes
   useEffect(() => {
     fetchRepledgeEntries();
   }, [currentPage]);

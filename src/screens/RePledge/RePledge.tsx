@@ -741,7 +741,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Building2Icon, SearchIcon, PlusIcon, TrashIcon, SettingsIcon } from "lucide-react";
+import { Building2Icon, ChevronDownIcon, SearchIcon, PlusIcon, TrashIcon, SettingsIcon } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -782,7 +782,7 @@ interface RepledgeFormData {
   afterInterestPercent: number;
   paymentDate: string;
   dueDate: string;
-  startDate: string;
+  startDate: string; 
   endDate: string;
 }
 
@@ -793,7 +793,7 @@ interface LoanSuggestion {
 }
 
 interface FormTemplateData {
-  bankName: string;
+  bankId: string;
   interestPercent: number;
   validityPeriod: number;
   afterInterestPercent: number;
@@ -802,6 +802,7 @@ interface FormTemplateData {
 }
 
 export const RePledge = (): JSX.Element => {
+  
   const {
     loading,
     error,
@@ -817,36 +818,34 @@ export const RePledge = (): JSX.Element => {
   } = useRepledge();
 
   const [formTemplate, setFormTemplate] = useState<FormTemplateData>({
-    bankName: "",
+    bankId: "",
     interestPercent: 0,
     validityPeriod: 0,
     afterInterestPercent: 0,
     paymentDate: "",
-    startDate: "",
+    startDate: "", 
   });
 
   const { banks, loading: banksLoading } = useBanks();
 
-  const [forms, setForms] = useState<RepledgeFormData[]>([
-    {
-      loanId: "",
-      loanNo: "",
-      reNo: "",
-      netWeight: 0,
-      grossWeight: 0,
-      stoneWeight: 0,
-      amount: 0,
-      processingFee: 0,
-      bankId: "",
-      interestPercent: 0,
-      validityPeriod: 0,
-      afterInterestPercent: 0,
-      paymentDate: "",
-      dueDate: "",
-      startDate: "",
-      endDate: "",
-    },
-  ]);
+  const [forms, setForms] = useState<RepledgeFormData[]>([{
+    loanId: "",
+    loanNo: "",
+    reNo: "",
+    netWeight: 0,
+    grossWeight: 0,
+    stoneWeight: 0,
+    amount: 0,
+    processingFee: 0,
+    bankId: "",
+    interestPercent: 0,
+    validityPeriod: 0,
+    afterInterestPercent: 0,
+    paymentDate: "",
+    dueDate: "",
+    startDate: "", 
+    endDate: "",
+  }]);
 
   const [activeFormIndex, setActiveFormIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -857,11 +856,8 @@ export const RePledge = (): JSX.Element => {
   const [showBankManagement, setShowBankManagement] = useState(false);
 
   useEffect(() => {
-    // Sync the search input with the data of the currently active form.
     const currentLoanNo = forms[activeFormIndex]?.loanNo || "";
     setSearchQuery(currentLoanNo);
-
-    // Hide any old suggestions when switching forms.
     setShowSuggestions(false);
   }, [activeFormIndex, forms]);
 
@@ -869,7 +865,7 @@ export const RePledge = (): JSX.Element => {
     const activeForm = forms[activeFormIndex];
     if (activeForm) {
       setFormTemplate({
-        bankName: getBankName(activeForm.bankId),
+        bankId: activeForm.bankId,
         interestPercent: activeForm.interestPercent,
         validityPeriod: activeForm.validityPeriod,
         afterInterestPercent: activeForm.afterInterestPercent,
@@ -877,11 +873,10 @@ export const RePledge = (): JSX.Element => {
         startDate: activeForm.startDate,
       });
     }
-  }, [forms, activeFormIndex, banks]);
+  }, [forms, activeFormIndex]);
 
   const currentForm = forms[activeFormIndex];
 
-  // Handle loan search
   const handleLoanSearch = async (loanNo: string) => {
     if (!loanNo.trim()) return;
 
@@ -903,7 +898,6 @@ export const RePledge = (): JSX.Element => {
     }
   };
 
-  // Handle search suggestions with debounce
   useEffect(() => {
     if (isSuggestionSelected) {
       return;
@@ -921,13 +915,13 @@ export const RePledge = (): JSX.Element => {
     return () => clearTimeout(debounceTimer);
   }, [searchQuery, isSuggestionSelected, searchLoanSuggestions]);
 
-  // useEffect to automatically calculate the end date
   useEffect(() => {
     if (currentForm && currentForm.startDate && currentForm.validityPeriod > 0) {
       try {
         const start = new Date(currentForm.startDate);
         const end = addMonths(start, currentForm.validityPeriod);
         const formattedEndDate = format(end, 'yyyy-MM-dd');
+
         if (formattedEndDate !== currentForm.endDate) {
           updateFormData(activeFormIndex, 'endDate', formattedEndDate);
         }
@@ -937,32 +931,17 @@ export const RePledge = (): JSX.Element => {
     }
   }, [currentForm?.startDate, currentForm?.validityPeriod, activeFormIndex]);
 
-  // Add new form
   const addNewForm = () => {
     const newForm: RepledgeFormData = {
-      loanId: "",
-      loanNo: "",
-      reNo: "",
-      netWeight: 0,
-      grossWeight: 0,
-      stoneWeight: 0,
-      amount: 0,
-      processingFee: 0,
-      dueDate: "",
-      endDate: "",
-      bankId: forms[activeFormIndex]?.bankId || "",
-      interestPercent: forms[activeFormIndex]?.interestPercent || 0,
-      validityPeriod: forms[activeFormIndex]?.validityPeriod || 0,
-      afterInterestPercent: forms[activeFormIndex]?.afterInterestPercent || 0,
-      paymentDate: forms[activeFormIndex]?.paymentDate || "",
-      startDate: forms[activeFormIndex]?.startDate || "",
+      loanId: "", loanNo: "", reNo: "", netWeight: 0, grossWeight: 0, stoneWeight: 0,
+      amount: 0, processingFee: 0, dueDate: "", endDate: "",
+      ...formTemplate,
     };
     setForms([...forms, newForm]);
     setActiveFormIndex(forms.length);
     setSearchQuery("");
   };
 
-  // Remove form
   const removeForm = (index: number) => {
     if (forms.length > 1) {
       const updatedForms = forms.filter((_, i) => i !== index);
@@ -973,33 +952,17 @@ export const RePledge = (): JSX.Element => {
     }
   };
 
-  // Update form data
   const updateFormData = (index: number, field: keyof RepledgeFormData, value: any) => {
     const updatedForms = [...forms];
     updatedForms[index] = { ...updatedForms[index], [field]: value };
     setForms(updatedForms);
-
-    // Specific logic for KMB bank
-    if (field === 'bankId' && getBankName(value) === 'KMB') {
-      const formToUpdate = {
-        ...updatedForms[index],
-        validityPeriod: 12,
-        interestPercent: 15,
-        afterInterestPercent: 18,
-        paymentDate: 'Cash',
-      };
-      updatedForms[index] = formToUpdate;
-      setForms(updatedForms);
-    }
   };
 
-  // Get bank name by ID
   const getBankName = (bankId: string) => {
     const bank = banks.find(b => b.id === bankId);
     return bank ? bank.name : '';
   };
 
-  // Save all forms
   const handleSave = async () => {
     for (const form of forms) {
       if (form.loanNo && form.reNo) {
@@ -1016,37 +979,35 @@ export const RePledge = (): JSX.Element => {
           interest_percent: form.interestPercent,
           validity_period: form.validityPeriod,
           after_interest_percent: form.afterInterestPercent,
-          payment_date: form.paymentDate,
-          due_date: form.dueDate,
-          start_date: form.startDate,
-          end_date: form.endDate,
+          payment_date: form.paymentDate || null,
+          due_date: form.dueDate || null,
+          start_date: form.startDate || null,
+          end_date: form.endDate || null,
         });
       }
     }
-    setForms([
-      {
-        loanId: "",
-        loanNo: "",
-        reNo: "",
-        netWeight: 0,
-        grossWeight: 0,
-        stoneWeight: 0,
-        amount: 0,
-        processingFee: 0,
-        bankId: "",
-        interestPercent: 0,
-        validityPeriod: 0,
-        afterInterestPercent: 0,
-        paymentDate: "",
-        dueDate: "",
-        startDate: "",
-        endDate: "",
-      },
-    ]);
+    
+    setForms([{
+      loanId: "",
+      loanNo: "",
+      reNo: "",
+      netWeight: 0,
+      grossWeight: 0,
+      stoneWeight: 0,
+      amount: 0,
+      processingFee: 0,
+      bankId: "",
+      interestPercent: 0,
+      validityPeriod: 0,
+      afterInterestPercent: 0,
+      paymentDate: "",
+      dueDate: "",
+      startDate: "",
+      endDate: "",
+    }]);
     setActiveFormIndex(0);
   };
 
-  // Handle delete confirmation
   const handleDelete = async (id: string) => {
     await deleteRepledgeEntry(id);
     setDeleteConfirmId(null);
@@ -1055,7 +1016,6 @@ export const RePledge = (): JSX.Element => {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-md mx-auto bg-white">
-        {/* Header */}
         <header className="w-full h-[73px] bg-black rounded-b-[47px] flex items-center justify-center relative">
           <h1 className="text-white text-xl font-semibold">
             Re Pledge Entry
@@ -1069,12 +1029,10 @@ export const RePledge = (): JSX.Element => {
         </header>
 
         <div className="p-4 space-y-4">
-          {/* Subtitle */}
           <div className="mt-4">
             <p className="text-gray-800 text-base">Single/Multiple Repledge</p>
           </div>
 
-          {/* Bank Selection */}
           <div className="relative">
             <Select
               value={currentForm.bankId}
@@ -1101,7 +1059,6 @@ export const RePledge = (): JSX.Element => {
             </Select>
           </div>
 
-          {/* First Row of Controls */}
           <div className="grid grid-cols-3 gap-2">
             <Input
               type="number"
@@ -1126,7 +1083,6 @@ export const RePledge = (): JSX.Element => {
             />
           </div>
 
-          {/* Second Row of Controls (Payment Method and Dates) */}
           <div className="grid grid-cols-3 gap-2">
             <Input
               type="text"
@@ -1146,15 +1102,13 @@ export const RePledge = (): JSX.Element => {
               type="date"
               placeholder="End Date"
               value={currentForm.endDate}
-              readOnly
+              readOnly 
               className="h-10 bg-[#f0f0f0] border-[#cccccc] rounded-[30px] text-center text-sm text-gray-500"
             />
           </div>
 
-          {/* Black Card Section */}
           <Card className="bg-black rounded-[20px] p-4 relative">
             <CardContent className="p-0 space-y-4">
-              {/* Form Navigation */}
               {forms.length > 1 && (
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex gap-2">
@@ -1185,27 +1139,28 @@ export const RePledge = (): JSX.Element => {
                 </div>
               )}
 
-              {/* Loan Search */}
               <div className="relative">
-                <div className="flex items-center bg-white rounded-[15px] border-2 border-white p-2">
+                <div className="flex items-center bg-white rounded-[15px] p-2 transition-all focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-black focus-within:ring-blue-500">
                   <Input
-                    placeholder="Ln.no"
+                    placeholder="Search by Ln.no"
+                    aria-label="Search by Loan Number"
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
                       setIsSuggestionSelected(false);
                     }}
-                    className="border-0 bg-transparent text-sm flex-1"
+                    className="border-0 bg-transparent text-sm flex-1 h-8 p-0 focus-outline-none"
                   />
                   <Button
                     onClick={() => handleLoanSearch(searchQuery)}
                     size="sm"
-                    className="h-8 w-8 p-0 bg-transparent hover:bg-gray-100"
+                    aria-label="Search"
+                    className="h-8 w-8 p-0 bg-transparent hover:bg-gray-100 rounded-md"
                   >
                     <SearchIcon className="w-4 h-4 text-gray-600" />
                   </Button>
                 </div>
-                {/* Search Suggestions */}
+                
                 {showSuggestions && (
                   <div className="absolute top-full left-0 right-0 bg-white border rounded-lg shadow-lg z-10 mt-1 max-h-60 overflow-y-auto">
                     {loading ? (
@@ -1238,7 +1193,6 @@ export const RePledge = (): JSX.Element => {
                 )}
               </div>
 
-              {/* Re.no */}
               <Input
                 placeholder="Re.no"
                 value={currentForm.reNo}
@@ -1246,15 +1200,7 @@ export const RePledge = (): JSX.Element => {
                 className="bg-white rounded-[30px] border-[#242424] text-sm"
               />
 
-              {/* Weight Fields */}
               <div className="grid grid-cols-3 gap-2">
-                <Input
-                  type="number"
-                  placeholder="Nt.Wt"
-                  value={currentForm.netWeight || ""}
-                  onChange={(e) => updateFormData(activeFormIndex, 'netWeight', parseFloat(e.target.value) || 0)}
-                  className="bg-white rounded-[30px] border-[#242424] text-sm"
-                />
                 <Input
                   type="number"
                   placeholder="Weight"
@@ -1269,9 +1215,15 @@ export const RePledge = (): JSX.Element => {
                   onChange={(e) => updateFormData(activeFormIndex, 'stoneWeight', parseFloat(e.target.value) || 0)}
                   className="bg-white rounded-[30px] border-[#242424] text-sm"
                 />
+                <Input
+                  type="number"
+                  placeholder="Nt.Wt"
+                  value={currentForm.netWeight || ""}
+                  onChange={(e) => updateFormData(activeFormIndex, 'netWeight', parseFloat(e.target.value) || 0)}
+                  className="bg-white rounded-[30px] border-[#242424] text-sm"
+                />
               </div>
 
-              {/* Amount and Processing Fee */}
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   type="number"
@@ -1290,8 +1242,6 @@ export const RePledge = (): JSX.Element => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Add Another Form Button */}
           <div className="flex justify-end">
             <Button
               onClick={addNewForm}
@@ -1304,25 +1254,6 @@ export const RePledge = (): JSX.Element => {
             </Button>
           </div>
 
-          {/* Save Button */}
-          <div className="flex justify-center">
-            <Button
-              onClick={handleSave}
-              disabled={loading}
-              className="w-32 h-10 bg-black rounded-[31.5px] text-white font-semibold"
-            >
-              {loading ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-
-          {/* Error Display */}
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          {/* Existing Entries List */}
           {repledgeEntries.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-lg font-semibold">Recent Entries</h3>
@@ -1375,7 +1306,6 @@ export const RePledge = (): JSX.Element => {
             </div>
           )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="mt-6">
               <PaginationContent>
@@ -1405,7 +1335,22 @@ export const RePledge = (): JSX.Element => {
             </Pagination>
           )}
 
-          {/* Bank Management Modal */}
+          <div className="flex justify-center">
+            <Button
+              onClick={handleSave}
+              disabled={loading}
+              className="w-32 h-10 bg-black rounded-[31.5px] text-white font-semibold"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
           <Dialog open={showBankManagement} onOpenChange={setShowBankManagement}>
             <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
               <DialogHeader>
@@ -1415,10 +1360,8 @@ export const RePledge = (): JSX.Element => {
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                {/* Quick Add Bank Form */}
                 <QuickAddBankForm onBankAdded={() => {}} />
-
-                {/* Banks List */}
+                
                 <div className="space-y-2">
                   <h4 className="font-medium">Available Banks</h4>
                   {banksLoading ? (
@@ -1450,7 +1393,6 @@ export const RePledge = (): JSX.Element => {
   );
 };
 
-// Quick Add Bank Form Component
 const QuickAddBankForm = ({ onBankAdded }: { onBankAdded: () => void }) => {
   const { createBank, loading } = useBanks();
   const [formData, setFormData] = useState({
