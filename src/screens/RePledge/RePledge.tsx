@@ -4,7 +4,7 @@
 
 
 import React, { useState, useEffect } from "react";
-import { Building2Icon, ChevronDownIcon, SearchIcon, PlusIcon, TrashIcon, SettingsIcon } from "lucide-react";
+import { Building2Icon, ChevronDownIcon, SearchIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -27,9 +27,9 @@ import {
   PaginationPrevious,
 } from "../../components/ui/pagination";
 import { useRepledge } from "../../hooks/useRepledge";
-import { useBanks } from "../../hooks/useBank";
 import { format } from "date-fns";
 
+// --- MODIFIED --- Added startDate and endDate to the form data structure
 interface RepledgeFormData {
   loanId: string;
   loanNo: string;
@@ -43,8 +43,10 @@ interface RepledgeFormData {
   interestPercent: number;
   validityPeriod: number;
   afterInterestPercent: number;
-  paymentDate: string;
+  paymentDate: string; // This will now be used for Payment Method
   dueDate: string;
+  startDate: string; // --- ADDED ---
+  endDate: string;   // --- ADDED ---
 }
 
 interface LoanSuggestion {
@@ -53,7 +55,19 @@ interface LoanSuggestion {
   status: string;
 }
 
+  interface FormTemplateData {
+  bankName: string;
+  interestPercent: number;
+  validityPeriod: number;
+  afterInterestPercent: number;
+  paymentDate: string;
+  startDate: string; // --- ADD THIS LINE ---
+
+}
+
+
 export const RePledge = (): JSX.Element => {
+  
   const {
     loading,
     error,
@@ -70,7 +84,22 @@ export const RePledge = (): JSX.Element => {
 
   const { banks, loading: banksLoading } = useBanks();
 
+  const [formTemplate, setFormTemplate] = useState<FormTemplateData>({
+    bankName: "",
+    interestPercent: 0,
+    validityPeriod: 0,
+    afterInterestPercent: 0,
+    paymentDate: "",
+    startDate: "", // --- ADD THIS LINE ---
+
+  });
+
+
+  
+
+  // --- MODIFIED --- Added startDate and endDate to the initial state
   const [forms, setForms] = useState<RepledgeFormData[]>([{
+    loanId: "",
     loanNo: "",
     reNo: "",
     netWeight: 0,
@@ -84,20 +113,31 @@ export const RePledge = (): JSX.Element => {
     afterInterestPercent: 0,
     paymentDate: "",
     dueDate: "",
-    loanId: ""
   }]);
+
+  
 
   const [activeFormIndex, setActiveFormIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<LoanSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSuggestionSelected, setIsSuggestionSelected] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const [showBankManagement, setShowBankManagement] = useState(false);
+
+  const banks = [
+    "State Bank of India",
+    "HDFC Bank",
+    "ICICI Bank",
+    "Axis Bank",
+    "Punjab National Bank",
+    "Bank of Baroda",
+    "Canara Bank",
+    "Union Bank of India",
+  ];
 
   // Handle loan search
   const handleLoanSearch = async (loanNo: string) => {
     if (!loanNo.trim()) return;
-
     const result = await fetchLoanDetails(loanNo);
     if (result) {
       const updatedForms = [...forms];
@@ -105,7 +145,7 @@ export const RePledge = (): JSX.Element => {
         ...updatedForms[activeFormIndex],
         loanId: result.loan.id,
         loanNo: result.loan.loan_no,
-        reNo: `RE${Date.now()}`, // Generate unique re-pledge number
+        // reNo: `RE${Date.now()}`,
         netWeight: result.totals.net_weight,
         grossWeight: result.totals.gross_weight,
         stoneWeight: result.totals.stone_weight,
@@ -117,20 +157,43 @@ export const RePledge = (): JSX.Element => {
   };
 
   // Handle search suggestions
+  
+  // --- MODIFY THIS USEEFFECT ---
+useEffect(() => {
+  // If a suggestion was just clicked, do nothing.
+  if (isSuggestionSelected) {
+    return;
+  }
+  const debounceTimer = setTimeout(async () => {
+    if (searchQuery.length >= 2) {
+      const results = await searchLoanSuggestions(searchQuery);
+      setSuggestions(results);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, 300);
+  return () => clearTimeout(debounceTimer);
+}, [searchQuery, isSuggestionSelected, searchLoanSuggestions]); // Add dependencies
+  // --- ADDED --- useEffect to automatically calculate the end date
   useEffect(() => {
-    const debounceTimer = setTimeout(async () => {
-      if (searchQuery.length >= 2) {
-        const results = await searchLoanSuggestions(searchQuery);
-        setSuggestions(results);
-        setShowSuggestions(true);
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300);
+    if (currentForm && currentForm.startDate && currentForm.validityPeriod > 0) {
+      try {
+        const start = new Date(currentForm.startDate);
+        const end = addMonths(start, currentForm.validityPeriod);
+        const formattedEndDate = format(end, 'yyyy-MM-dd');
 
-    return () => clearTimeout(debounceTimer);
-  }, [searchQuery]);
+        // Only update if the calculated date is different
+        if (formattedEndDate !== currentForm.endDate) {
+          updateFormData(activeFormIndex, 'endDate', formattedEndDate);
+        }
+      } catch (e) {
+        console.error("Invalid date for calculation", e);
+      }
+    }
+  }, [currentForm?.startDate, currentForm?.validityPeriod, activeFormIndex]);
+
 
   // Add new form
   const addNewForm = () => {
@@ -143,7 +206,7 @@ export const RePledge = (): JSX.Element => {
       stoneWeight: 0,
       amount: 0,
       processingFee: 0,
-      bankId: "", // Changed from bankName
+      bankName: "",
       interestPercent: 0,
       validityPeriod: 0,
       afterInterestPercent: 0,
@@ -172,16 +235,12 @@ export const RePledge = (): JSX.Element => {
     setForms(updatedForms);
   };
 
-  // Get bank name by ID
-  const getBankName = (bankId: string) => {
-    const bank = banks.find(b => b.id === bankId);
-    return bank ? bank.name : '';
-  };
-
   // Save all forms
   const handleSave = async () => {
-    for (const form of forms) {
-      if (form.loanNo && form.reNo) {
+  for (const form of forms) {
+    if (form.loanNo && form.reNo) {
+      try {
+        console.log("Attempting to save:", form); // Log what you're saving
         await saveRepledgeEntry({
           loan_id: form.loanId,
           loan_no: form.loanNo,
@@ -195,8 +254,10 @@ export const RePledge = (): JSX.Element => {
           interest_percent: form.interestPercent,
           validity_period: form.validityPeriod,
           after_interest_percent: form.afterInterestPercent,
-          payment_date: form.paymentDate,
-          due_date: form.dueDate,
+          payment_date: form.paymentDate || null,
+          due_date: form.dueDate || null,
+          start_date: form.startDate || null,
+          end_date: form.endDate || null,
         });
       }
     }
@@ -211,7 +272,7 @@ export const RePledge = (): JSX.Element => {
       stoneWeight: 0,
       amount: 0,
       processingFee: 0,
-      bankId: "", // Changed from bankName
+      bankName: "",
       interestPercent: 0,
       validityPeriod: 0,
       afterInterestPercent: 0,
@@ -227,12 +288,9 @@ export const RePledge = (): JSX.Element => {
     setDeleteConfirmId(null);
   };
 
-  const currentForm = forms[activeFormIndex];
-
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-md mx-auto bg-white">
-        {/* Header */}
         <header className="w-full h-[73px] bg-black rounded-b-[47px] flex items-center justify-center relative">
           <h1 className="text-white text-xl font-semibold">
             Re Pledge Entry
@@ -246,16 +304,15 @@ export const RePledge = (): JSX.Element => {
         </header>
 
         <div className="p-4 space-y-4">
-          {/* Subtitle */}
           <div className="mt-4">
             <p className="text-gray-800 text-base">Single/Multiple Repledge</p>
           </div>
 
-          {/* Bank Selection */}
           <div className="relative">
+            {/* --- MODIFIED --- Changed onValueChange to use the new handleBankChange function */}
             <Select
-              value={currentForm.bankId}
-              onValueChange={(value) => updateFormData(activeFormIndex, 'bankId', value)}
+              value={currentForm.bankName}
+              onValueChange={(value) => updateFormData(activeFormIndex, 'bankName', value)}
             >
               <SelectTrigger className="w-full h-12 bg-[#f7f6fc] border-[#e0e1e3] rounded-[30px] px-4">
                 <div className="flex items-center gap-2">
@@ -278,55 +335,37 @@ export const RePledge = (): JSX.Element => {
             </Select>
           </div>
 
-          {/* First Row of Controls */}
           <div className="grid grid-cols-3 gap-2">
-            <Input
-              type="number"
-              placeholder="Int %"
-              value={currentForm.interestPercent || ""}
-              onChange={(e) => updateFormData(activeFormIndex, 'interestPercent', parseFloat(e.target.value) || 0)}
-              className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Validity"
-              value={currentForm.validityPeriod || ""}
-              onChange={(e) => updateFormData(activeFormIndex, 'validityPeriod', parseInt(e.target.value) || 0)}
-              className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Aft.Int %"
-              value={currentForm.afterInterestPercent || ""}
-              onChange={(e) => updateFormData(activeFormIndex, 'afterInterestPercent', parseFloat(e.target.value) || 0)}
-              className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
-            />
+            <Input type="number" placeholder="Int %" value={currentForm.interestPercent || ""} onChange={(e) => updateFormData(activeFormIndex, 'interestPercent', parseFloat(e.target.value) || 0)} className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm" />
+            <Input type="number" placeholder="Validity" value={currentForm.validityPeriod || ""} onChange={(e) => updateFormData(activeFormIndex, 'validityPeriod', parseInt(e.target.value) || 0)} className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm" />
+            <Input type="number" placeholder="Aft.Int %" value={currentForm.afterInterestPercent || ""} onChange={(e) => updateFormData(activeFormIndex, 'afterInterestPercent', parseFloat(e.target.value) || 0)} className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm" />
           </div>
 
-          {/* Second Row of Controls */}
+          {/* --- MODIFIED --- This section is updated to remove the duplicate field and add date pickers */}
           <div className="grid grid-cols-3 gap-2">
             <Input
               type="text"
-              placeholder="Payment Details"
-              value={currentForm.paymentDate}
-              onChange={(e) => updateFormData(activeFormIndex, 'paymentDate', e.target.value)}
-              className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
-            />
-            <Input
-              type="text"
-              placeholder="Payment Details"
+              placeholder="Payment Method"
               value={currentForm.paymentDate}
               onChange={(e) => updateFormData(activeFormIndex, 'paymentDate', e.target.value)}
               className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
             />
             <Input
               type="date"
-              placeholder="Due Date"
-              value={currentForm.dueDate}
-              onChange={(e) => updateFormData(activeFormIndex, 'dueDate', e.target.value)}
+              placeholder="Start Date"
+              value={currentForm.startDate}
+              onChange={(e) => updateFormData(activeFormIndex, 'startDate', e.target.value)}
               className="h-10 bg-[#f7f6fc] border-[#242424] rounded-[30px] text-center text-sm"
             />
+            <Input
+              type="date"
+              placeholder="End Date"
+              value={currentForm.endDate}
+              readOnly // --- ADDED --- End date is calculated, so it should not be manually edited
+              className="h-10 bg-[#f0f0f0] border-[#cccccc] rounded-[30px] text-center text-sm text-gray-500"
+            />
           </div>
+
 
           {/* Black Card Section */}
           <Card className="bg-black rounded-[20px] p-4 relative">
@@ -339,11 +378,10 @@ export const RePledge = (): JSX.Element => {
                       <button
                         key={index}
                         onClick={() => setActiveFormIndex(index)}
-                        className={`w-8 h-8 rounded-full text-sm font-semibold ${
-                          activeFormIndex === index
-                            ? 'bg-white text-black'
-                            : 'bg-gray-600 text-white'
-                        }`}
+                        className={`w-8 h-8 rounded-full text-sm font-semibold ${activeFormIndex === index
+                          ? 'bg-white text-black'
+                          : 'bg-gray-600 text-white'
+                          }`}
                       >
                         {index + 1}
                       </button>
@@ -364,41 +402,58 @@ export const RePledge = (): JSX.Element => {
 
               {/* Loan Search */}
               <div className="relative">
-                <div className="flex items-center bg-white rounded-[15px] border-2 border-white p-2">
+                {/* --- MODIFIED --- Added focus-within for better visibility when active */}
+                <div className="flex items-center bg-white rounded-[15px] p-2 transition-all focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-black focus-within:ring-blue-500">
                   <Input
-                    placeholder="Ln.no"
+                    placeholder="Search by Ln.no"
+                    aria-label="Search by Loan Number" // Added for accessibility
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="border-0 bg-transparent text-sm flex-1"
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setIsSuggestionSelected(false); // Reset when user types
+                    }}
+                    className="border-0 bg-transparent text-sm flex-1 h-8 p-0 focus-outline-none"
                   />
                   <Button
                     onClick={() => handleLoanSearch(searchQuery)}
                     size="sm"
-                    className="h-8 w-8 p-0 bg-transparent hover:bg-gray-100"
+                    aria-label="Search" // Added for accessibility
+                    className="h-8 w-8 p-0 bg-transparent hover:bg-gray-100 rounded-md"
                   >
                     <SearchIcon className="w-4 h-4 text-gray-600" />
                   </Button>
                 </div>
-                
-                {/* Search Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border rounded-lg shadow-lg z-10 mt-1">
-                    {suggestions.map((suggestion) => (
-                      <button
-                        key={suggestion.loan_no}
-                        onClick={() => {
-                          setSearchQuery(suggestion.loan_no);
-                          handleLoanSearch(suggestion.loan_no);
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm border-b last:border-b-0"
-                      >
-                        <div className="font-medium">{suggestion.loan_no}</div>
-                        <div className="text-gray-500 text-xs">
-                          ₹{suggestion.amount} - {suggestion.status}
-                        </div>
-                      </button>
-                    ))}
+
+                {/* --- MODIFIED --- Improved suggestion box with loading and no-results states */}
+                {showSuggestions && (
+                  <div className="absolute top-full left-0 right-0 bg-white border rounded-lg shadow-lg z-10 mt- max-h-60 overflow-y-auto">
+                    {loading ? (
+                      <div className="p-3 text-sm text-gray-500 text-center">Searching...</div>
+                    ) : suggestions.length > 0 ? (
+                      suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.loan_no}
+                          onClick={() => {
+                            setIsSuggestionSelected(true); // Flag that a selection was made
+                            setSearchQuery(suggestion.loan_no);
+                            handleLoanSearch(suggestion.loan_no);
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm border-b last:border-b-0"
+                        >
+                          {/* --- MODIFIED --- Flex layout for better alignment */}
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <div className="font-medium text-black">{suggestion.loan_no}</div>
+                              <div className="text-gray-500 text-xs capitalize">{suggestion.status}</div>
+                            </div>
+                            <div className="font-mono text-xs text-gray-600">₹{suggestion.amount}</div>
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-3 text-sm text-gray-500 text-center">No results found.</div>
+                    )}
                   </div>
                 )}
               </div>
@@ -413,13 +468,7 @@ export const RePledge = (): JSX.Element => {
 
               {/* Weight Fields */}
               <div className="grid grid-cols-3 gap-2">
-                <Input
-                  type="number"
-                  placeholder="Nt.Wt"
-                  value={currentForm.netWeight || ""}
-                  onChange={(e) => updateFormData(activeFormIndex, 'netWeight', parseFloat(e.target.value) || 0)}
-                  className="bg-white rounded-[30px] border-[#242424] text-sm"
-                />
+
                 <Input
                   type="number"
                   placeholder="Weight"
@@ -432,6 +481,13 @@ export const RePledge = (): JSX.Element => {
                   placeholder="St. Wt"
                   value={currentForm.stoneWeight || ""}
                   onChange={(e) => updateFormData(activeFormIndex, 'stoneWeight', parseFloat(e.target.value) || 0)}
+                  className="bg-white rounded-[30px] border-[#242424] text-sm"
+                />
+                <Input
+                  type="number"
+                  placeholder="Nt.Wt"
+                  value={currentForm.netWeight || ""}
+                  onChange={(e) => updateFormData(activeFormIndex, 'netWeight', parseFloat(e.target.value) || 0)}
                   className="bg-white rounded-[30px] border-[#242424] text-sm"
                 />
               </div>
@@ -455,6 +511,45 @@ export const RePledge = (): JSX.Element => {
               </div>
             </CardContent>
           </Card>
+          <div className="flex justify-end">
+            <Button
+              onClick={addNewForm}
+              size="sm"
+              variant="outline"
+              className="h-10 rounded-full px-4 flex items-center gap-2"
+            >
+              <PlusIcon className="w-4 h-4" />
+              Add Another
+            </Button></div>
+
+          {/* Add Button */}
+          {/* <div className="flex justify-center">
+            <Button
+              onClick={addNewForm}
+              className="w-12 h-12 bg-black rounded-full p-0"
+            >
+              <PlusIcon className="w-6 h-6 text-white" />
+            </Button>
+          </div> */}
+
+          {/* Save Button */}
+          <div className="flex justify-center">
+            <Button
+              onClick={handleSave}
+              disabled={loading}
+              className="w-32 h-10 bg-black rounded-[31.5px] text-white font-semibold"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </Button>
+          </div>
+
+          {/* Error Display */}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
 
           {/* Existing Entries List */}
           {repledgeEntries.length > 0 && (
@@ -477,13 +572,13 @@ export const RePledge = (): JSX.Element => {
                     </div>
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button
+                        {/* <Button
                           variant="destructive"
                           size="sm"
                           className="h-8 w-8 p-0"
                         >
                           <TrashIcon className="w-4 h-4" />
-                        </Button>
+                        </Button> */}
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
@@ -566,107 +661,8 @@ export const RePledge = (): JSX.Element => {
               {error}
             </div>
           )}
-
-          {/* Bank Management Modal */}
-          <Dialog open={showBankManagement} onOpenChange={setShowBankManagement}>
-            <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Bank Management</DialogTitle>
-                <DialogDescription>
-                  Manage your banks here. You can add, edit, or remove banks.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                {/* Quick Add Bank Form */}
-                <QuickAddBankForm onBankAdded={() => {}} />
-                
-                {/* Banks List */}
-                <div className="space-y-2">
-                  <h4 className="font-medium">Available Banks</h4>
-                  {banksLoading ? (
-                    <div className="text-center py-4 text-gray-500">Loading...</div>
-                  ) : banks.length === 0 ? (
-                    <div className="text-center py-4 text-gray-500">No banks found</div>
-                  ) : (
-                    banks.map((bank) => (
-                      <div key={bank.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <div>
-                          <div className="font-medium">{bank.name}</div>
-                          {bank.branch && <div className="text-xs text-gray-500">{bank.branch}</div>}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button onClick={() => setShowBankManagement(false)}>
-                  Close
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
-    </div>
-  );
-};
-
-// Quick Add Bank Form Component
-const QuickAddBankForm = ({ onBankAdded }: { onBankAdded: () => void }) => {
-  const { createBank, loading } = useBanks();
-  const [formData, setFormData] = useState({
-    name: '',
-    code: '',
-    branch: '',
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    try {
-      await createBank(formData);
-      setFormData({ name: '', code: '', branch: '' });
-      onBankAdded();
-    } catch (error) {
-      console.error('Error creating bank:', error);
-    }
-  };
-
-  return (
-    <div className="border rounded-lg p-4">
-      <h4 className="font-medium mb-3">Quick Add Bank</h4>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          placeholder="Bank Name *"
-          value={formData.name}
-          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          className="h-10"
-          required
-        />
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            placeholder="Code"
-            value={formData.code}
-            onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
-            className="h-10"
-          />
-          <Input
-            placeholder="Branch"
-            value={formData.branch}
-            onChange={(e) => setFormData(prev => ({ ...prev, branch: e.target.value }))}
-            className="h-10"
-          />
-        </div>
-        <Button
-          type="submit"
-          disabled={loading || !formData.name.trim()}
-          className="w-full h-10 bg-black text-white"
-        >
-          {loading ? 'Adding...' : 'Add Bank'}
-        </Button>
-      </form>
     </div>
   );
 };
