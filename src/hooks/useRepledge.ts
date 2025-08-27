@@ -189,8 +189,8 @@ export const useRepledge = () => {
   };
 
   useEffect(() => {
-    fetchRepledgeEntries(1);
-  }, []);
+    fetchRepledgeEntries();
+  }, [currentPage]);
 
   return {
     loading,

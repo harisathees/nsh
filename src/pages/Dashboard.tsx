@@ -83,7 +83,7 @@ export function Dashboard() {
     }
 
     return (
-        <div className="p-4 md:p-6 space-y-6 bg-slate-100 min-h-screen">
+        <div className="p-0 corner md:p-6 space-y-5 bg-slate-100 min-h-screen">
             <div className="lg:col-span-1">
                 <RatesCard goldRate={rates.gold} silverRate={rates.silver} />
             </div>
@@ -109,7 +109,7 @@ export function Dashboard() {
                 </motion.div>
             </motion.div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="lg:col-span-2">
                     <h2 className="text-xl text-slate-800 mb-4">Recent Loans</h2>
                     <RecentLoansTable loans={recentLoans} loading={loansLoading} />
