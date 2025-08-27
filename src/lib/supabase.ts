@@ -230,40 +230,40 @@ export type Database = {
 
 //Re pledge
 
-export interface Loan {
-  id: string;
-  loan_no: string;
-  customer_id: string;
-  date: string;
-  amount: number;
-  interest_rate: number;
-  validity_months: number;
-  interest_taken: boolean;
-  payment_method: string;
-  processing_fee: number;
-  estimated_amount: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  duedate: string;
-  metal_rate: number;
-}
+// export interface Loan {
+//   id: string;
+//   loan_no: string;
+//   customer_id: string;
+//   date: string;
+//   amount: number;
+//   interest_rate: number;
+//   validity_months: number;
+//   interest_taken: boolean;
+//   payment_method: string;
+//   processing_fee: number;
+//   estimated_amount: number;
+//   status: string;
+//   created_at: string;
+//   updated_at: string;
+//   duedate: string;
+//   metal_rate: number;
+// }
 
-export interface Jewel {
-  id: string;
-  loan_id: string;
-  type: string;
-  quality: string;
-  description: string;
-  pieces: number;
-  weight: number;
-  stone_weight: number;
-  net_weight: number;
-  faults: string;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-}
+// export interface Jewel {
+//   id: string;
+//   loan_id: string;
+//   type: string;
+//   quality: string;
+//   description: string;
+//   pieces: number;
+//   weight: number;
+//   stone_weight: number;
+//   net_weight: number;
+//   faults: string;
+//   image_url: string;
+//   created_at: string;
+//   updated_at: string;
+// }
 
 export interface RepledgeEntry {
   id: string;
@@ -275,7 +275,7 @@ export interface RepledgeEntry {
   stone_weight: number;
   amount: number;
   processing_fee: number;
-  bank_name: string;
+  bank_id: string;  // <-- use bank_id instead of bank_name
   interest_percent: number;
   validity_period: number;
   after_interest_percent: number;
@@ -283,4 +283,12 @@ export interface RepledgeEntry {
   due_date: string;
   created_at: string;
   updated_at: string;
+
+  // Optional: if you want to show bank details directly after join
+  bank?: {
+    id: string;
+    name: string;
+  };
 }
+
+
