@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS repledge_entries (
   interest_percent numeric(5,2),
   validity_period integer,
   after_interest_percent numeric(5,2),
-  payment_date date,
+  payment_method text,
   due_date date,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()

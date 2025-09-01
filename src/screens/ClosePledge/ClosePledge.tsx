@@ -10,7 +10,7 @@ import { useLoanCalculation } from "../../hooks/useLoanCalculation";
 
 // --- Helper Components for Page States ---
 const GoldCoinSpinner: React.FC<{ text?: string }> = ({ text = "Loading Loan Data..." }) => (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
         <svg className="coin-spinner w-20 h-20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <radialGradient id="gold_gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
@@ -101,7 +101,7 @@ export const ClosePledge: React.FC = () => {
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold text-slate-800">Close Pledge</h1>
-                        <p className="text-sm text-slate-500">Calculate final amount for Loan #{loanData.loan_no}</p>
+                        {/* <p className="text-sm text-slate-500">Calculate final amount for Loan #{loanData.loan_no}</p> */}
                     </div>
                 </header>
 

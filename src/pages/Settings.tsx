@@ -21,9 +21,9 @@ import { BankManagement } from '../screens/RePledge/BankManagement';
 
 const settingsSections = [
   { id: 'metal_rates', title: 'Metal Rates', description: 'Update daily Gold and Silver rates.', icon: <Coins className="w-5 h-5" /> },
-  { id: 'general', title: 'General', description: 'Basic application configuration.', icon: <SettingsIcon className="w-5 h-5" /> },
-  { id: 'user_management', title: 'User Management', description: 'Manage user roles and permissions.', icon: <Users className="w-5 h-5" /> },
   { id: 'bank_management', title: 'Bank Management', description: 'Manage bank details and settings.', icon: <Building2 className="w-5 h-5" /> },
+  { id: 'user_management', title: 'User Management', description: 'Manage user roles and permissions.', icon: <Users className="w-5 h-5" /> },
+  { id: 'general', title: 'General', description: 'Basic application configuration.', icon: <SettingsIcon className="w-5 h-5" /> },
 ];
 
 // --- Metal Rates Panel Component (MODIFIED) ---
@@ -118,7 +118,7 @@ const MetalRatesPanel = () => {
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
                 <Button onClick={handleSave} disabled={saving || !hasChanges} className="w-full sm:w-auto">
                     {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2"/>}
-                    Save Changes
+                    Save Rates
                 </Button>
                 {statusMessage && (
                     <div className={`flex items-center gap-2 text-sm font-medium ${statusMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>

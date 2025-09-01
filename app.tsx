@@ -15,10 +15,12 @@ import { MetalRatesSettings } from './src/pages/MetalRatesSettings';
 import { RedirectBasedOnAuth } from "./src/pages/RedirectBasedOnAuth";
 import { RePledge } from "./src/screens/RePledge/RePledge";
 import { BankManagement } from "./src/screens/RePledge/BankManagement";
+import { Toaster } from 'react-hot-toast';
 
 export default function App() {
   return (
     <BrowserRouter>
+    <Toaster position="bottom-center" />
       <Routes>
         {/* 🔁 Root route decides where to go (dashboard or login) */}
         <Route path="/" element={<RedirectBasedOnAuth />} />
@@ -46,5 +48,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    
   );
 }

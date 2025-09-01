@@ -7,6 +7,11 @@ import { FiSearch, FiFilter, FiDownload, FiChevronLeft, FiChevronRight, FiAlertC
 import { FaUsers } from 'react-icons/fa';
 
 // --- Interfaces & Types ---
+interface Jewel {
+  net_weight: string; // From your JSON, net_weight is a string
+  // Add other jewel properties if needed
+}
+
 interface Loan {
   id: string;
   loan_no: string;
@@ -15,6 +20,9 @@ interface Loan {
   validity_months: number;
   status: string;
   created_at: string;
+  interest_rate?: number;
+  processing_fee?: number;
+  jewels: Jewel[]; // Each loan will now have an array of jewels
 }
 
 interface Customer {
@@ -83,9 +91,10 @@ export const Customers: React.FC = () => {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
+      // UPDATED QUERY to fetch jewels nested inside loans
       const { data, error } = await supabase
         .from('customers')
-        .select(`*, loans (*)`)
+        .select(`*, loans (*, jewels (*))`)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -125,7 +134,6 @@ export const Customers: React.FC = () => {
       .filter(customer => validityFilter === 'All' || customer.mostRecentLoan?.validity_months === Number(validityFilter))
       .filter(customer => {
         if (!customer.mostRecentLoan?.date) {
-            // If a date filter is active, hide customers with no loans. If not, show them.
             return dateFilter === 'All' && !startDate && !endDate;
         }
         
@@ -181,6 +189,11 @@ export const Customers: React.FC = () => {
     filteredCustomers.forEach(cust => {
         if (cust.loans.length > 0) {
             cust.loans.forEach(loan => {
+                // UPDATED LOGIC to sum the net weight from all jewels in a loan
+                const totalNetWeight = loan.jewels?.reduce((sum, jewel) => {
+                  return sum + (parseFloat(jewel.net_weight) || 0);
+                }, 0) || 0;
+
                 exportData.push({
                     'Customer Name': cust.name || 'N/A',
                     'Mobile No': cust.mobile_no || 'N/A',
@@ -189,11 +202,26 @@ export const Customers: React.FC = () => {
                     'Loan Amount': loan.amount || 0,
                     'Loan Date': loan.date ? new Date(loan.date).toLocaleDateString('en-IN') : 'N/A',
                     'Validity (Months)': loan.validity_months || 'N/A',
+                    'Interest %': loan.interest_rate || 'N/A',
+                    'Net Weight': totalNetWeight > 0 ? totalNetWeight.toFixed(3) : 'N/A',
+                    'Processing Fee': loan.processing_fee || 0,
                     'Loan Status': calculateLoanStatus(loan.date, loan.validity_months, loan.status),
                 });
             });
         } else {
-             exportData.push({ 'Customer Name': cust.name || 'N/A', 'Mobile No': cust.mobile_no || 'N/A', 'Address': cust.address || 'N/A', 'Loan No': 'No Loans' });
+             exportData.push({ 
+                'Customer Name': cust.name || 'N/A', 
+                'Mobile No': cust.mobile_no || 'N/A', 
+                'Address': cust.address || 'N/A', 
+                'Loan No': 'No Loans',
+                'Loan Amount': '',
+                'Loan Date': '',
+                'Validity (Months)': '',
+                'Interest %': '',
+                'Net Weight': '',
+                'Processing Fee': '',
+                'Loan Status': 'No Loan'
+            });
         }
     });
 

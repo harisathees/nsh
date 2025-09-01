@@ -57,7 +57,7 @@ const OverdueNotice = React.forwardRef<HTMLDivElement, NoticeProps>((props, ref)
         <div style={{ marginTop: '3rem' }}>Authorized Signatory</div>
       </div>
 
-      <p style={{ fontSize: '0.9rem', marginTop: '2rem' }}>
+      <p style={{ fontSize: '0.9rem', marginTop: '10rem' }}>
         (குறிப்பு:நீங்கள் வரும் போது இந்த நோட்டீஸ் கட்டாயமாக&nbsp;கொண்டு&nbsp;வரவும்.)
       </p>
     </div>

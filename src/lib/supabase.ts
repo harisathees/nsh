@@ -279,7 +279,7 @@ export interface RepledgeEntry {
   interest_percent: number;
   validity_period: number;
   after_interest_percent: number;
-  payment_date: string;
+  payment_method: string;
   due_date: string;
   created_at: string;
   updated_at: string;

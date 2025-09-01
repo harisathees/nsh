@@ -150,3 +150,24 @@
     page-break-before: always;
   }
 }
+
+/* Add this to your main CSS file, like src/index.css */
+.a4-container {
+  width: 210mm;
+  height: 297mm;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  margin: 0 auto; /* Center the "paper" in the scrollable area */
+}
+
+/* This ensures it prints correctly without the shadow */
+@media print {
+  .a4-container {
+    box-shadow: none;
+    margin: 0;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
