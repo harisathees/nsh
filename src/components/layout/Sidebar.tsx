@@ -12,7 +12,9 @@ import {
   ChevronDown,
   ChevronRight,
   Building2,
-  RefreshCw
+  RefreshCw,
+  Users2Icon,
+  Users2
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -37,6 +39,7 @@ const navigation: NavigationItem[] = [
     icon: Landmark,
     children: [
       { name: 'Add Re-pledge', href: '/re-pledge-entry/add', icon: PlusCircle },
+      { name: 'Re-pledge Details', href: '/re-pledge-entry/details', icon: Users },
     ]
   },
   { name: 'Reports', href: '/reports', icon: FileText },

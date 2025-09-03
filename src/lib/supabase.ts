@@ -42,6 +42,8 @@ export interface Loan {
   processing_fee: number | null
   estimated_amount: number | null
   status: string | null
+  duedate: string | null
+  metal_rate: number | null
   created_at: string | null
   updated_at: string | null
 }
@@ -228,7 +230,7 @@ export type Database = {
 }
 
 
-//Re pledge
+// Re pledge
 
 // export interface Loan {
 //   id: string;
@@ -291,4 +293,41 @@ export interface RepledgeEntry {
   };
 }
 
+//for view repledge and edit repledge
 
+export interface RepledgeEntry {
+  id: string
+  loan_id: string
+  loan_no: string
+  re_no: string
+  net_weight: number
+  gross_weight: number
+  stone_weight: number
+  amount: number
+  processing_fee: number
+  interest_percent: number
+  validity_period: number
+  after_interest_percent: number
+  payment_method: string
+  end_date: string
+  start_date: string
+  due_date: string
+  bank_id: string
+  created_at: string
+  updated_at: string
+}
+
+
+export interface Bank {
+  id: string
+  name: string
+  code: string
+  branch: string
+  is_active: boolean
+  default_interest: number
+  validity_months: number
+  post_validity_interest: number
+  payment_method: string
+  created_at: string
+  updated_at: string
+}
