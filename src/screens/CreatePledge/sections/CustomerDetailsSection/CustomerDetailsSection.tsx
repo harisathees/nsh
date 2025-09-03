@@ -218,7 +218,7 @@ export const CustomerDetailsSection = ({
                     }}
                     className="border border-[#269AD4] rounded-[30px] px-1 py-2 w-20 pl-3"
                   >
-                    <option value="">Select</option>
+                    {/* <option value="">Select</option> */}
                     <option value="Aadhar">Aadhar</option>
                     <option value="PAN">PAN</option>
                     <option value="Voter ID">Voter ID</option>

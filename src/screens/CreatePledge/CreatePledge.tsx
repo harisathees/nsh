@@ -6,6 +6,7 @@ import { JewelDetailsSection } from './sections/JewelDetailsSection/JewelDetails
 import { LoanDetailsSection } from './sections/LoanDetailsSection/LoanDetailsSection';
 import { Button } from '../../components/ui/button';
 import { SaveIcon, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast'; // --- 1. Import toast ---
 
 export interface CustomerData {
   name: string;
@@ -47,7 +48,8 @@ export interface LoanData {
 export const CreatePledge = (): JSX.Element => {
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // The error state is no longer needed, toast will handle it.
+  // const [error, setError] = useState<string | null>(null); 
 
   const [jewelType, setJewelType] = useState("Gold");
   const [metalRate, setMetalRate] = useState(9000);
@@ -88,39 +90,37 @@ export const CreatePledge = (): JSX.Element => {
     status: 'Active',
   });
 
-  // Calculate jewelType from first jewel
   useEffect(() => {
     if (jewelData.length > 0 && jewelData[0].type) {
       setJewelType(jewelData[0].type);
     }
   }, [jewelData]);
 
-  // Update metalRate dynamically
- useEffect(() => {
-  const fetchRate = async () => {
-    const { data, error } = await supabase
-      .from("metal_rates")
-      .select("*")
-      .order("updated_at", { ascending: false })
-      .limit(2);
+  useEffect(() => {
+    const fetchRate = async () => {
+      const { data, error } = await supabase
+        .from("metal_rates")
+        .select("*")
+        .order("updated_at", { ascending: false })
+        .limit(2);
 
-    if (error) {
-      console.error("Error fetching metal rates:", error);
-      return;
-    }
+      if (error) {
+        console.error("Error fetching metal rates:", error);
+        return;
+      }
 
-    const goldRate = data.find(d => d.metal_type === "Gold")?.rate || 0;
-    const silverRate = data.find(d => d.metal_type === "Silver")?.rate || 0;
+      const goldRate = data.find(d => d.metal_type === "Gold")?.rate || 0;
+      const silverRate = data.find(d => d.metal_type === "Silver")?.rate || 0;
 
-    if (jewelType === "Silver") {
-      setMetalRate(silverRate);
-    } else {
-      setMetalRate(goldRate);
-    }
-  };
+      if (jewelType === "Silver") {
+        setMetalRate(silverRate);
+      } else {
+        setMetalRate(goldRate);
+      }
+    };
 
-  fetchRate();
-}, [jewelType]);
+    fetchRate();
+  }, [jewelType]);
 
 
   const totalNetWeight = jewelData.reduce((sum, jewel) => sum + jewel.net_weight, 0);
@@ -130,87 +130,91 @@ export const CreatePledge = (): JSX.Element => {
   };
 
   const validateForm = (): boolean => {
+    // --- 2. Use toast.error for validation feedback ---
     if (!customerData.name.trim()) {
-      setError('Customer name is required');
+      toast.error('Customer name is required');
       return false;
     }
     if (!customerData.mobile_no.trim()) {
-      setError('Mobile number is required');
+      toast.error('Mobile number is required');
       return false;
     }
     if (!loanData.loan_no.trim()) {
-      setError('Loan number is required');
+      toast.error('Loan number is required');
       return false;
     }
     if (loanData.amount <= 0) {
-      setError('Loan amount must be greater than 0');
+      toast.error('Loan amount must be greater than 0');
       return false;
     }
-    if (jewelData.length === 0) {
-      setError('At least one jewel is required');
-      return false;
+    if (jewelData.length === 0 || !jewelData[0].type) {
+        toast.error('At least one jewel is required');
+        return false;
     }
 
     for (let i = 0; i < jewelData.length; i++) {
-      const jewel = jewelData[i];
-      if (!jewel.type.trim()) {
-        setError(`Jewel ${i + 1}: Type is required`);
-        return false;
-      }
-      if (jewel.weight <= 0) {
-        setError(`Jewel ${i + 1}: Weight must be greater than 0`);
-        return false;
-      }
+        const jewel = jewelData[i];
+        if (!jewel.type.trim()) {
+            toast.error(`Jewel ${i + 1}: Type is required`);
+            return false;
+        }
+        if (jewel.weight <= 0) {
+            toast.error(`Jewel ${i + 1}: Weight must be greater than 0`);
+            return false;
+        }
     }
 
     return true;
   };
 
+  // --- 3. Refactor handleSave with toast.promise ---
   const handleSave = async () => {
     if (!validateForm()) return;
 
-    try {
-      setSaving(true);
-      setError(null);
+    setSaving(true);
+    
+    // This is the async function that toast.promise will track
+    const savePledgePromise = async () => {
+        const { data: customer, error: customerError } = await supabase
+          .from('customers')
+          .insert([customerData])
+          .select()
+          .single();
 
-      const { data: customer, error: customerError } = await supabase
-        .from('customers')
-        .insert([customerData])
-        .select()
-        .single();
+        if (customerError) throw new Error(`Customer Error: ${customerError.message}`);
 
-      if (customerError) throw new Error(`Failed to create customer: ${customerError.message}`);
+        const { data: loan, error: loanError } = await supabase
+          .from('loans')
+          .insert([{ ...loanData, customer_id: customer.id, metal_rate: metalRate }])
+          .select()
+          .single();
 
-      const { data: loan, error: loanError } = await supabase
-        .from('loans')
-        .insert([{
-          ...loanData,
-          customer_id: customer.id,
-          metal_rate: metalRate,
-        }])
-        .select()
-        .single();
+        if (loanError) throw new Error(`Loan Error: ${loanError.message}`);
 
-      if (loanError) throw new Error(`Failed to create loan: ${loanError.message}`);
+        const jewelInserts = jewelData.map(jewel => ({ loan_id: loan.id, ...jewel }));
+        const { error: jewelError } = await supabase.from('jewels').insert(jewelInserts);
 
-      const jewelInserts = jewelData.map(jewel => ({
-        loan_id: loan.id,
-        ...jewel,
-      }));
+        if (jewelError) throw new Error(`Jewel Error: ${jewelError.message}`);
+        
+        // Return the loan on success so the success handler can use it
+        return loan;
+    };
 
-      const { error: jewelError } = await supabase
-        .from('jewels')
-        .insert(jewelInserts);
-
-      if (jewelError) throw new Error(`Failed to create jewels: ${jewelError.message}`);
-
-      alert(`Pledge created successfully! Loan ID: ${loan.loan_no}`);
-      navigate(`/print-notice/${loan.id}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create pledge. Please try again.');
-    } finally {
-      setSaving(false);
-    }
+    await toast.promise(
+        savePledgePromise(),
+        {
+            loading: 'Creating Pledge...',
+            success: (loan) => {
+                setSaving(false);
+                navigate(`/print-notice/${loan.id}`);
+                return <b>Pledge created successfully!</b>;
+            },
+            error: (err) => {
+                setSaving(false);
+                return <b>{err.message || 'Failed to create pledge.'}</b>;
+            }
+        }
+    );
   };
 
   return (
@@ -224,8 +228,6 @@ export const CreatePledge = (): JSX.Element => {
         </button>
 
         <div className="text-center mb-8 mt-8">
-          {/* <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Pledge</h1> */}
-          {/* <p className="text-gray-600">Enter customer, jewel and loan details to create a new pledge</p> */}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto">
@@ -254,12 +256,6 @@ export const CreatePledge = (): JSX.Element => {
           </div>
         </div>
 
-        {error && (
-          <div className="mt-4 text-center">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-
         <div className="flex justify-center mt-8">
           <Button
             onClick={handleSave}
@@ -271,7 +267,7 @@ export const CreatePledge = (): JSX.Element => {
             ) : (
               <SaveIcon className="w-5 h-5" />
             )}
-            {saving ? 'Creating Pledge...' : 'Finished'}
+            {saving ? 'Creating Pledge...' : 'Create'}
           </Button>
         </div>
       </div>
