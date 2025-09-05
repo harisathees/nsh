@@ -331,3 +331,46 @@ export interface Bank {
   created_at: string
   updated_at: string
 }
+
+
+//repledge calculation
+export interface RepledgeEntry {
+  id: string;
+  loan_id: string;
+  loan_no: string;
+  re_no: string;
+  net_weight: number;
+  gross_weight: number;
+  stone_weight: number;
+  amount: number;
+  processing_fee: number;
+  interest_percent: number;
+  validity_period: number;
+  after_interest_percent: number;
+  payment_method: string;
+  end_date: string;
+  start_date: string;
+  due_date: string;
+  bank_id: string;
+  created_at?: string;
+  updated_at?: string;
+  // Join fields from banks table
+  banks?: {
+    name: string;
+    code: string;
+    branch: string;
+  };
+}
+
+export interface CloseRepledge {
+  id?: string;
+  repledge_id: string;
+  end_date: string;
+  payment_method: 'cash' | 'bank_transfer' | 'upi';
+  calculation_method: 'method_1' | 'method_2' | 'method_3';
+  duration: number;
+  final_interest_rate: number;
+  calculated_interest: number;
+  total_payable: number;
+  created_at?: string;
+}

@@ -422,7 +422,7 @@
 
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2, User, Landmark, ShieldCheck, Gem } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, User, Landmark, ShieldCheck, Gem, X } from "lucide-react";
 
 // UI Components
 import { Button } from "../../../components/ui/button";
@@ -631,6 +631,25 @@ export const ViewRepledge = (): JSX.Element => {
           >
             <Edit className="w-4 h-4" />
             Edit
+          </Button>
+
+          <Button 
+            onClick={() => navigate(`/close-repledge/${loanId}`)}
+            variant="outline"
+            className="flex-1 h-12 border-black text-black hover:bg-gray-50 font-header-heading-semibold-heading-5-semibold rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
+          >
+            <X className="w-4 h-4" />
+            Close
+          </Button>
+
+          <Button 
+            onClick={handleDelete}
+            variant="destructive"
+            className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-header-heading-semibold-heading-5-semibold rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
+            disabled={loading}
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete
           </Button>
         </div>
       </footer>
