@@ -508,7 +508,7 @@ export const ViewRepledge = (): JSX.Element => {
             variant="ghost"
             size="icon"
             onClick={() => navigate('/re-pledge-entry/details')}
-            className="text-white hover:bg-white/10 rounded-full"
+            className="text-white hover:bg-black/10 rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
