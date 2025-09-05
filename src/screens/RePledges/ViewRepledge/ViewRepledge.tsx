@@ -642,7 +642,7 @@ export const ViewRepledge = (): JSX.Element => {
             Close
           </Button>
 
-          <Button 
+          {/* <Button 
             onClick={handleDelete}
             variant="destructive"
             className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-header-heading-semibold-heading-5-semibold rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
@@ -650,7 +650,7 @@ export const ViewRepledge = (): JSX.Element => {
           >
             <Trash2 className="w-4 h-4" />
             Delete
-          </Button>
+          </Button> */}
         </div>
       </footer>
     </>
