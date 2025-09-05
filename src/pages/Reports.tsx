@@ -9,8 +9,8 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 // --- Import Both Notice Components ---
-import OverdueNotice from '../OverdueNotice'; // Your existing overdue/auction notice
-import AnnualNotice from '../AnnualNotice';   // The new annual notice we just created
+import OverdueNotice from '../notice/overduenotice/OverdueNotice'; // Your existing overdue/auction notice
+import AnnualNotice from '../notice/AnnualNotice/AnnualNotice';   // The new annual notice we just created
 
 // --- Interfaces & Types (No changes) ---
 interface Jewel {

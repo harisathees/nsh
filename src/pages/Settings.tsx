@@ -17,7 +17,7 @@ import {
   Building2,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { BankManagement } from '../screens/RePledge/BankManagement';
+import { BankManagement } from '../screens/RePledges/CreateRePledge/BankManagement'
 
 const settingsSections = [
   { id: 'metal_rates', title: 'Metal Rates', description: 'Update daily Gold and Silver rates.', icon: <Coins className="w-5 h-5" /> },

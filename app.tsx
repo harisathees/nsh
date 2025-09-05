@@ -6,16 +6,19 @@ import { PledgeEntry } from '../nsh/src/pages/PledgeEntry';
 import { Reports } from '../nsh/src/pages/Reports';
 import { Customers } from './src/pages/Customers';
 import { Settings } from '../nsh/src/pages/Settings';
-import { ViewPledge } from "../nsh/src/screens/ViewPledge/ViewPledge";
-import { CreatePledge } from '../nsh/src/screens/CreatePledge/CreatePledge';
-import { EditPledge } from "../nsh/src/screens/EditPledge/EditPledge";
-import { ClosePledge } from "../nsh/src/screens/ClosePledge/ClosePledge";
+import { ViewPledge } from "../nsh/src/screens/Pledges/ViewPledge/ViewPledge";
+import { CreatePledge } from '../nsh/src/screens/Pledges/CreatePledge/CreatePledge';
+import { EditPledge } from "../nsh/src/screens/Pledges/EditPledge/EditPledge";
+import { ClosePledge } from "../nsh/src/screens/Pledges/ClosePledge/ClosePledge";
 import NoticePrint from "./src/notice/noticeform/NoticePrint";
 import { MetalRatesSettings } from './src/pages/MetalRatesSettings';
 import { RedirectBasedOnAuth } from "./src/pages/RedirectBasedOnAuth";
-import { RePledge } from "./src/screens/RePledge/RePledge";
-import { BankManagement } from "./src/screens/RePledge/BankManagement";
+import { RePledge } from "./src/screens/RePledges/CreateRePledge/RePledge";
+import { BankManagement } from "./src/screens/RePledges/CreateRePledge/BankManagement";
 import { Toaster } from 'react-hot-toast';
+import { RepledgeDetails } from "./src/screens/RePledges/RepledgeDetails/RepledgeDetails";
+import { ViewRepledge } from "./src/screens/RePledges/ViewRepledge";
+import { EditRepledge } from "./src/screens/RePledges/EditRepledge";
 
 export default function App() {
   return (
@@ -41,6 +44,9 @@ export default function App() {
           <Route path="/reports" element={<Reports />} />
           <Route path="/re-pledge-entry/add" element={<RePledge />} />
           <Route path="/re-pledge-entry/add-bank" element={<BankManagement/>} />
+          <Route path="/re-pledge-entry/details" element={<RepledgeDetails />} />
+          <Route path="/view-repledge/:loanId" element={<ViewRepledge />} />
+          <Route path="/edit-repledge/:loanId" element={<EditRepledge />} />
           <Route path="/pledge-entry" element={<PledgeEntry />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/settings" element={<Settings />} />
