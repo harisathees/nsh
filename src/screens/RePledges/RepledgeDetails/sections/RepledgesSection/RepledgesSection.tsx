@@ -76,21 +76,17 @@ export const RepledgesSection: React.FC<RepledgesSectionProps> = ({
         <Card className="w-full bg-transparent border-0">
           <CardContent className="p-0">
             {/* Table header */}
-            <div className="bg-[#f7f9fb] border border-solid border-[#f4f7fa] px-2 sm:px-3 py-2">
-              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4 text-[6px] sm:text-[7.9px] [font-family:'Inter',Helvetica] font-light text-[#9aa3b6]">
+            <div className="bg-[#f7f9fb] border border-solid border-[#f4f7fa] px-4 sm:px-3 py-2">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-4 text-[10px] sm:text-[7.9px] [font-family:'Inter',Helvetica] font-light text-[#9aa3b6]">
                 <div className="col-span-2 sm:col-span-1">Customer</div>
                 <div className="hidden sm:block">Bank</div>
                 <div className="font-normal text-[#9ea6b7]">Re.no</div>
                 <div className="font-light text-[#9ba3b6]">AMOUNT</div>
-                <div className="text-right font-light">STATUS</div>
+                {/* <div className="text-right font-light">STATUS</div> */}
               </div>
             </div>
 
-            <img
-              className="w-full h-[2px] sm:h-[3px] object-cover"
-              alt="Background"
-              src="/background-5.png"
-            />
+             
 
             {/* Table body */}
             <div className="divide-y divide-slate-200 max-h-[calc(100vh-200px)] sm:max-h-none overflow-y-auto">
@@ -151,13 +147,13 @@ export const RepledgesSection: React.FC<RepledgesSectionProps> = ({
                     </div>
 
                     {/* Status */}
-                    <div className="flex justify-end">
+                    {/* <div className="flex justify-end">
                       <div className="w-4 h-4 sm:w-[18px] sm:h-[18px] bg-[url(/background-6.png)] bg-cover bg-[50%_50%] flex items-center justify-center">
                         <span className="[font-family:'Inter',Helvetica] font-medium text-[#568b6e] text-[7px] sm:text-[9.6px]">
                           A
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 ))
               )}

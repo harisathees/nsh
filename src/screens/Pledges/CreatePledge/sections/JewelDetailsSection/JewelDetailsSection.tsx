@@ -322,7 +322,7 @@ export const JewelDetailsSection = ({
         ))}
 
         {/* Add New Jewel Button */}
-        <div className="flex justify-center">
+        {/* <div className="flex justify-center">
           <Button
             onClick={addNewJewel}
             className="flex items-center gap-2 h-12 px-6 py-3 bg-[#269AD4] rounded-[31.5px] text-[#ffffff] hover:bg-[#46cbf3] border border-[#269AD4]"
@@ -330,7 +330,7 @@ export const JewelDetailsSection = ({
             <PlusIcon className="w-5 h-5" />
             Add New Jewel
           </Button>
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -3,7 +3,6 @@ import { Card } from "../../../../../components/ui/card";
 import { Input } from "../../../../../components/ui/input";
 import { LoanData } from "../../CreatePledge";
 
-
 interface LoanDetailsSectionProps {
   loanData: LoanData;
   onLoanDataChange: (data: LoanData) => void;
@@ -16,8 +15,8 @@ export const LoanDetailsSection = ({
   loanData,
   onLoanDataChange,
   jewelType,
-  totalNetWeight, // ✅ Add this
-  metalRate,       // ✅ Add this
+  totalNetWeight,
+  metalRate,
 }: LoanDetailsSectionProps): JSX.Element => {
   const handleInputChange = (field: keyof LoanData, value: string | number | boolean) => {
     onLoanDataChange({
@@ -30,26 +29,40 @@ export const LoanDetailsSection = ({
     if (jewelType === "Silver" && loanData.interest_rate !== "5") {
       onLoanDataChange({ ...loanData, interest_rate: "5" });
     }
-  }, [jewelType]);
+  }, [jewelType, loanData, onLoanDataChange]);
+
   useEffect(() => {
     const estimated = totalNetWeight * metalRate * 0.8;
-    if (!isNaN(estimated)) {
+    if (!isNaN(estimated) && Math.round(estimated) !== loanData.estimated_amount) {
       onLoanDataChange({ ...loanData, estimated_amount: Math.round(estimated) });
     }
-  }, [totalNetWeight, metalRate]);
+  }, [totalNetWeight, metalRate, loanData, onLoanDataChange]);
 
   useEffect(() => {
     if (loanData.date && loanData.validity_months) {
       const date = new Date(loanData.date);
       date.setMonth(date.getMonth() + Number(loanData.validity_months));
       const dueDateStr = date.toISOString().split("T")[0];
-      onLoanDataChange({ ...loanData, duedate: dueDateStr });
+      if (dueDateStr !== loanData.duedate) {
+        onLoanDataChange({ ...loanData, duedate: dueDateStr });
+      }
     }
-  }, [loanData.date, loanData.validity_months]);
+  }, [loanData.date, loanData.validity_months, loanData, onLoanDataChange]);
 
+  useEffect(() => {
+  const amount = Number(loanData.amount) || 0;
+  let fee = amount * 0.0025; // Use 'let' to allow modification
 
+  // --- Logic to cap the fee at 300 ---
+  if (fee > 300) {
+    fee = 300;
+  }
 
-
+  // Only update the state if the calculated fee is different
+  if (fee !== loanData.processing_fee) {
+    onLoanDataChange({ ...loanData, processing_fee: fee });
+  }
+}, [loanData.amount, loanData.processing_fee, onLoanDataChange, loanData]);
 
   const formFields = [
     { id: "loan_no", label: "Loan No", type: "text", value: loanData.loan_no, required: true },
@@ -57,26 +70,38 @@ export const LoanDetailsSection = ({
     { id: "amount", label: "Amount", type: "number", value: loanData.amount, required: true },
     { id: "interest_rate", label: "Interest %", type: "select", options: ["1", "1.5", "2", "2.5", "3", "5"], value: loanData.interest_rate },
     { id: "validity_months", label: "Validity Months", type: "select", options: ["3", "6", "12"], value: loanData.validity_months },
-    { id: "duedate", label: "Due Date", type: "date", value: loanData.duedate, required: false },
+    { id: "duedate", label: "Due Date", type: "date", value: loanData.duedate, readOnly: true },
     { id: "payment_method", label: "Payment Method", type: "select", value: loanData.payment_method, options: ["Cash", "UPI"] },
-    { id: "processing_fee", label: "Processing Fee", type: "number", value: loanData.processing_fee },
-    { id: "estimated_amount", label: "Estimated Amount", type: "number", value: loanData.estimated_amount },
+    { id: "processing_fee", label: "Processing Fee", type: "number", value: loanData.processing_fee},
+    { id: "estimated_amount", label: "Estimated Amount", type: "number", value: loanData.estimated_amount, readOnly: true },
   ];
+  
+  const calculateAmountToBeGiven = () => {
+    const amount = Number(loanData.amount) || 0;
+    const processingFee = Number(loanData.processing_fee) || 0;
+    let finalAmount = amount - processingFee;
+
+    if (loanData.interest_taken) {
+      const interestRate = parseFloat(loanData.interest_rate) || 0;
+      const interestAmount = (amount * interestRate) / 100;
+      finalAmount -= interestAmount;
+    }
+    return finalAmount;
+  };
+
+  const amountToBeGiven = calculateAmountToBeGiven();
 
   return (
     <Card className="w-full rounded-[30px] bg-white shadow-lg">
       <div className="p-6">
         <div className="flex flex-col gap-6">
-          <h2 className="font-normal text-black text-lg">
-            Loan Details
-          </h2>
-
+          <h2 className="font-normal text-black text-lg">Loan Details</h2>
           <div className="flex flex-col gap-4">
             {formFields.map((field) => (
               <div key={field.id} className="relative">
                 <label className="block mb-5 text-sm font-medium text-black-700 px-2">
-                    {field.label}{field.required ? " *" : ""}
-                  </label>
+                  {field.label}{field.required ? " *" : ""}
+                </label>
                 {field.type === "select" ? (
                   <select
                     id={field.id}
@@ -85,36 +110,43 @@ export const LoanDetailsSection = ({
                       const val = e.target.value;
                       handleInputChange(
                         field.id as keyof LoanData,
-                        field.id === "validity_months" || field.id === "interest_rate"
-                          ? parseFloat(val)
-                          : val
+                        field.id === "validity_months" || field.id === "interest_rate" ? parseFloat(val) : val
                       );
                     }}
                     className="h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid border-[#269AD4] text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] focus:border-[#269AD4] w-full"
                     disabled={field.id === "interest_rate" && jewelType === "Silver"}
                   >
                     <option value="">Select {field.label}</option>
-                    {(field.id === "interest_rate" && jewelType === "Silver")
-                      ? [<option key="5" value="5">5</option>]
-                      : field.options?.map((opt) => (
+                    {(field.id === "interest_rate" && jewelType === "Silver") ?
+                      [<option key="5" value="5">5</option>] :
+                      field.options?.map((opt) => (
                         <option key={opt} value={opt}>{opt}</option>
-                      ))}
+                      ))
+                    }
                   </select>
                 ) : (
                   <Input
                     id={field.id}
                     placeholder={`${field.label}${field.required ? " *" : ""}`}
                     type={field.type}
+                    // --- ⬇️ THIS IS THE FIX ⬇️ ---
+                    // The value prop is now simplified to prevent formatting issues while typing.
                     value={field.value || ""}
-                    readOnly={field.id === "duedate"}
+                    readOnly={field.readOnly}
                     onChange={(e) => {
-                      let value: string | number = e.target.value;
-                      if (field.type === "number") {
-                        value = parseFloat(e.target.value) || 0;
+                      const rawValue = e.target.value;
+                      // Allow the input to be cleared
+                      if (rawValue === '') {
+                          handleInputChange(field.id as keyof LoanData, '');
+                      } else {
+                          let value: string | number = rawValue;
+                          if (field.type === "number") {
+                              value = parseFloat(rawValue);
+                          }
+                          handleInputChange(field.id as keyof LoanData, value);
                       }
-                      handleInputChange(field.id as keyof LoanData, value);
                     }}
-                    className={`h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] ${field.required ? "border-[#269AD4]" : "border-[#269AD4]"
+                    className={`h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] ${field.readOnly ? 'bg-gray-200 cursor-not-allowed' : ''} ${field.required ? "border-[#269AD4]" : "border-[#269AD4]"
                       } focus:border-[#269AD4]`}
                     required={field.required}
                   />
@@ -146,10 +178,24 @@ export const LoanDetailsSection = ({
                 className="h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid border-[#269AD4] text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] focus:border-[#269AD4] w-full"
               >
                 <option value="Active">Active</option>
-                {/* <option value="Overdue">Overdue</option>
-                <option value="Closed">Closed</option> */}
               </select>
             </div>
+            
+            <div className="relative pt-2">
+              <div className="flex justify-between items-baseline py-3 px-2 border-t border-dashed">
+                <label className="text-base font-medium text-black-700">
+                  Amount to be Given
+                </label>
+                <p className="text-2xl font-bold text-green-700">
+                  {new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    minimumFractionDigits: 0,
+                  }).format(amountToBeGiven)}
+                </p>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

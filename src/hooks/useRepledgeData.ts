@@ -4,7 +4,7 @@ import type { RepledgeEntry, Loan, Customer, Jewel, Bank } from '../lib/supabase
 
 interface RepledgeData {
   repledge: RepledgeEntry | null
-  loan: Loan | null
+  loan: (Loan & { customers: Customer | null }) | null // Nest customer in loan
   customer: Customer | null
   jewels: Jewel[]
   bank: Bank | null
@@ -23,77 +23,70 @@ export const useRepledgeData = (loanId: string) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!loanId) {
+        setLoading(false);
+        setError("No Loan ID provided.");
+        return;
+      }
+
       try {
         setLoading(true)
         setError(null)
 
-        // Fetch repledge entry
-        const { data: repledgeData, error: repledgeError } = await supabase
-          .from('repledge_entries')
-          .select('*')
-          .eq('loan_id', loanId)
-          .maybeSingle()
-
-        if (repledgeError) throw repledgeError
-
-        // Fetch loan details
+        // Step 1: Fetch the main loan and its associated customer in one query.
+        // This is the most critical record. If it doesn't exist, we can't proceed.
         const { data: loanData, error: loanError } = await supabase
           .from('loans')
-          .select('*')
+          .select('*, customers(*)') // Use Supabase to join customers table
           .eq('id', loanId)
-          .maybeSingle()
+          .single(); // .single() will error if no loan is found, which is what we want.
 
+        if (loanError) throw loanError;
 
-        if (loanError) throw loanError
+        // Step 2: Now that we have a valid loan, fetch other related data in parallel.
+        const [repledgeResult, jewelsResult] = await Promise.all([
+          supabase.from('repledge_entries').select('*').eq('loan_id', loanId).maybeSingle(),
+          supabase.from('jewels').select('*').eq('loan_id', loanId)
+        ]);
+        
+        const { data: repledgeData, error: repledgeError } = repledgeResult;
+        const { data: jewelData, error: jewelError } = jewelsResult;
 
-        // Fetch customer details
-        const { data: customerData, error: customerError } = await supabase
-          .from('customers')
-          .select('*')
-          .eq('id', loanData.customer_id)
-          .maybeSingle()
+        if (repledgeError) throw repledgeError;
+        if (jewelError) throw jewelError;
 
-        if (customerError) throw customerError
-
-        // Fetch jewel details
-        const { data: jewelData, error: jewelError } = await supabase
-          .from('jewels')
-          .select('*')
-          .eq('loan_id', loanId)
-
-        if (jewelError) throw jewelError
-
-        // Fetch bank details if bank_id exists
-        let bankData = null
-        if (repledgeData.bank_id) {
+        // Step 3: Fetch bank details only if a bank_id exists on the repledge entry.
+        let bankData = null;
+        if (repledgeData?.bank_id) {
           const { data: bank, error: bankError } = await supabase
             .from('banks')
             .select('*')
             .eq('id', repledgeData.bank_id)
-           .maybeSingle()
+            .single();
 
-          if (!bankError) {
-            bankData = bank
+          if (bankError) {
+             console.warn("Could not fetch bank details:", bankError.message);
+          } else {
+             bankData = bank;
           }
         }
 
         setData({
           repledge: repledgeData,
           loan: loanData,
-          customer: customerData,
+          customer: loanData.customers, // The customer is now nested inside the loan data
           jewels: jewelData || [],
           bank: bankData
         })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred')
+        console.error("Error fetching repledge data:", err);
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       } finally {
         setLoading(false)
       }
     }
 
-    if (loanId) {
-      fetchData()
-    }
+    fetchData()
   }, [loanId])
 
   return { data, loading, error }

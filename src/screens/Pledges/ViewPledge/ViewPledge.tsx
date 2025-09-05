@@ -112,7 +112,7 @@ export const ViewPledge = (): JSX.Element => {
               className="flex items-center gap-2 h-10 px-4 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-xl"
             >
               <PrinterIcon className="w-5 h-5" />
-              Print Notice
+              Print 
             </button>
             {/* --- END NEW --- */}
           </div>
