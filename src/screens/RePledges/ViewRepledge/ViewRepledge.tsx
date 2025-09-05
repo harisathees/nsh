@@ -395,14 +395,15 @@ export const ViewRepledge = (): JSX.Element => {
             Edit
           </Button>
 
-          <Button 
-            onClick={() => navigate('/')}
+        <Button
+            onClick={() => navigate(`/close-repledge/${loanId}`)}
             variant="outline"
             className="flex-1 h-12 border-black text-black hover:bg-gray-50 font-header-heading-semibold-heading-5-semibold rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
-          >
+            >
             <X className="w-4 h-4" />
-            Close
-          </Button>
+             Close
+        </Button>
+
 
           <Button 
             onClick={handleDelete}

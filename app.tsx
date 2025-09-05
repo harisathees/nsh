@@ -19,6 +19,7 @@ import { Toaster } from 'react-hot-toast';
 import { RepledgeDetails } from "./src/screens/RePledges/RepledgeDetails/RepledgeDetails";
 import { ViewRepledge } from "./src/screens/RePledges/ViewRepledge";
 import { EditRepledge } from "./src/screens/RePledges/EditRepledge";
+import { CloseRepledge } from "./src/screens/RePledges/CloseRepledge/CloseRepledge";
 
 export default function App() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/re-pledge-entry/details" element={<RepledgeDetails />} />
           <Route path="/view-repledge/:loanId" element={<ViewRepledge />} />
           <Route path="/edit-repledge/:loanId" element={<EditRepledge />} />
+          <Route path="/close-repledge/:loanId" element={<CloseRepledge />} />
           <Route path="/pledge-entry" element={<PledgeEntry />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/settings" element={<Settings />} />
