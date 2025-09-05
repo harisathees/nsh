@@ -422,7 +422,7 @@
 
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Edit, Trash2, User, Landmark, ShieldCheck, Gem } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, User, Landmark, ShieldCheck, Gem, X } from "lucide-react";
 
 // UI Components
 import { Button } from "../../../components/ui/button";
@@ -634,7 +634,7 @@ export const ViewRepledge = (): JSX.Element => {
           </Button>
 
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/close-repledge/${loanId}`)}
             variant="outline"
             className="flex-1 h-12 border-black text-black hover:bg-gray-50 font-header-heading-semibold-heading-5-semibold rounded-full transition-colors duration-200 flex items-center justify-center gap-2"
           >
