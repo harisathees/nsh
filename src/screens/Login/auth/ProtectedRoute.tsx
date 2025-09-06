@@ -1,6 +1,5 @@
-// src/components/auth/ProtectedRoute.tsx
 import { useEffect, useState } from "react";
-import { supabase } from "../../../lib/supabase"; 
+import { supabase } from "../../../lib/supabase";
 import { Navigate } from "react-router-dom";
 
 export function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -8,13 +7,11 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
   const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
-    // Get current session
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
     });
 
-    // Listen for session changes (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -24,11 +21,11 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
     };
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <p>Loading...</p>;
 
-  // 🔒 Redirect to login if no session
   if (!session) {
-    return <Navigate to="/login" replace />;
+    // Redirect to the NotLoggedIn page
+    return <Navigate to="/not-logged-in" replace />;
   }
 
   return children;

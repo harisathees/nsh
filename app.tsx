@@ -24,18 +24,23 @@ import { CloseRepledge } from "./src/screens/RePledges/CloseRepledge/CloseRepled
 // ProtectedRoute
 import { ProtectedRoute } from "./src/screens/Login/auth/ProtectedRoute";
 import GoldLoan404 from "./src/screens/404Page/404page";
+import { NotLoggedIn } from "./src/screens/Login/NotLoggedIn/NotLoggedIn";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="bottom-center" />
       <Routes>
-        {/* 🔁 Root route decides where to go (dashboard or login) */}
+        {/*  Root route decides where to go (dashboard or login) */}
         <Route path="/" element={<RedirectBasedOnAuth />} />
 
         {/* Public login route */}
         <Route path="/login" element={<Login />} />
 
+        {/* Not logged in route */}
+        <Route path="/not-logged-in" element={<NotLoggedIn />} />
+
+          {/* 404 Route */}
         <Route path="*" element={<GoldLoan404 />} />
     
         {/* Routes outside Layout (protected) */}

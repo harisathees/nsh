@@ -191,13 +191,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                   <span className="text-white font-semibold text-sm">SH</span>
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
                   Sabari Harish
                 </p>
-                <p className="text-xs text-gray-500 truncate">Admin</p>
               </div>
             </div>
 

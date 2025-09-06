@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 
 export interface RepledgeWithDetails {
   id: string
+  loan_id: string | null
   loan_no: string | null
   re_no: string | null
   amount: number | null
@@ -34,6 +35,7 @@ export const useRepledgeData = (searchTerm: string = '', page: number = 1, items
         .from('repledge_entries')
         .select(`
           id,
+          loan_id,
           loan_no,
           re_no,
           amount,
@@ -79,6 +81,7 @@ export const useRepledgeData = (searchTerm: string = '', page: number = 1, items
       // Transform the data to match our interface
       const transformedData: RepledgeWithDetails[] = (repledgeData || []).map((item: any) => ({
         id: item.id,
+        loan_id: item.loan_id, 
         loan_no: item.loan_no,
         re_no: item.re_no,
         amount: item.amount,

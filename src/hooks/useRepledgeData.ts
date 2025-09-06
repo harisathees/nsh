@@ -4,7 +4,7 @@ import type { RepledgeEntry, Loan, Customer, Jewel, Bank } from '../lib/supabase
 
 interface RepledgeData {
   repledge: RepledgeEntry | null
-  loan: (Loan & { customers: Customer | null }) | null // Nest customer in loan
+  loan: Loan | null
   customer: Customer | null
   jewels: Jewel[]
   bank: Bank | null
@@ -23,70 +23,76 @@ export const useRepledgeData = (loanId: string) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!loanId) {
-        setLoading(false);
-        setError("No Loan ID provided.");
-        return;
-      }
-
       try {
         setLoading(true)
         setError(null)
 
-        // Step 1: Fetch the main loan and its associated customer in one query.
-        // This is the most critical record. If it doesn't exist, we can't proceed.
+        // Fetch repledge entry
+        const { data: repledgeData, error: repledgeError } = await supabase
+          .from('repledge_entries')
+          .select('*')
+          .eq('loan_id', loanId)
+          .single()
+
+        if (repledgeError) throw repledgeError
+
+        // Fetch loan details
         const { data: loanData, error: loanError } = await supabase
           .from('loans')
-          .select('*, customers(*)') // Use Supabase to join customers table
+          .select('*')
           .eq('id', loanId)
-          .single(); // .single() will error if no loan is found, which is what we want.
+          .single()
 
-        if (loanError) throw loanError;
+        if (loanError) throw loanError
 
-        // Step 2: Now that we have a valid loan, fetch other related data in parallel.
-        const [repledgeResult, jewelsResult] = await Promise.all([
-          supabase.from('repledge_entries').select('*').eq('loan_id', loanId).maybeSingle(),
-          supabase.from('jewels').select('*').eq('loan_id', loanId)
-        ]);
-        
-        const { data: repledgeData, error: repledgeError } = repledgeResult;
-        const { data: jewelData, error: jewelError } = jewelsResult;
+        // Fetch customer details
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', loanData.customer_id)
+          .single()
 
-        if (repledgeError) throw repledgeError;
-        if (jewelError) throw jewelError;
+        if (customerError) throw customerError
 
-        // Step 3: Fetch bank details only if a bank_id exists on the repledge entry.
-        let bankData = null;
-        if (repledgeData?.bank_id) {
+        // Fetch jewel details
+        const { data: jewelData, error: jewelError } = await supabase
+          .from('jewels')
+          .select('*')
+          .eq('loan_id', loanId)
+
+        if (jewelError) throw jewelError
+
+        // Fetch bank details if bank_id exists
+        let bankData = null
+        if (repledgeData.bank_id) {
           const { data: bank, error: bankError } = await supabase
             .from('banks')
             .select('*')
             .eq('id', repledgeData.bank_id)
-            .single();
+            .single()
 
-          if (bankError) {
-             console.warn("Could not fetch bank details:", bankError.message);
-          } else {
-             bankData = bank;
+          if (!bankError) {
+            bankData = bank
           }
         }
 
         setData({
           repledge: repledgeData,
           loan: loanData,
-          customer: loanData.customers, // The customer is now nested inside the loan data
+          customer: customerData,
           jewels: jewelData || [],
           bank: bankData
         })
       } catch (err) {
-        console.error("Error fetching repledge data:", err);
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
+        setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
+    if (loanId) {
+      fetchData()
+    }
   }, [loanId])
 
   return { data, loading, error }

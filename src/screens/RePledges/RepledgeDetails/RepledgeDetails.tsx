@@ -105,7 +105,6 @@ export const RepledgeDetails = (): JSX.Element => {
       </div>
     );
   }
-
   return (
     <div className="p-4 sm:p-6 bg-slate-100 min-h-screen font-sans">
       <header className="mb-6 pb-4 border-b border-slate-200">
@@ -208,14 +207,16 @@ export const RepledgeDetails = (): JSX.Element => {
                       </td>
                       <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-800 font-semibold align-top text-right">{formatAmount(item.amount)}</td>
                       <td className="hidden sm:table-cell px-4 py-3 text-sm align-top">
-                        <span className={`
-                          px-2 py-1 rounded-full text-xs font-semibold
-                          ${item.status === 'active' ? 'bg-green-100 text-green-700' :
-                            item.status === 'closed' ? 'bg-red-100 text-red-700' :
-                            'bg-yellow-100 text-yellow-700'}
-                        `}>
-                          {item.status || '—'}
+                        <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm
+                          ${item.status?.toLowerCase() === 'active' ? 'bg-green-50 text-green-700 ring-1 ring-green-200'
+                          : item.status?.toLowerCase() === 'closed'
+                          ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                        : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}
+                        `}
+                        >
+                        {item.status || '—'}
                         </span>
+
                       </td>
 
                       {/* --- MOBILE CARD VIEW --- */}
@@ -236,14 +237,17 @@ export const RepledgeDetails = (): JSX.Element => {
                           <div><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
                           <div>
                             <p className="text-slate-500">Status</p>
-                            <p className={`
-                              text-xs font-semibold px-2 py-1 rounded-full inline-block
-                              ${item.status === 'active' ? 'bg-green-100 text-green-700' :
-                                item.status === 'closed' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'}
-                            `}>
-                              {item.status || '—'}
-                            </p>
+                          <span
+                             className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm
+                              ${item.status?.toLowerCase() === 'active'
+                              ? 'bg-green-50 text-green-700 ring-1 ring-green-200'
+                              : item.status?.toLowerCase() === 'closed'
+                              ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                              : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}
+                            `}
+                            >
+                              {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : '—'}
+                          </span>                            
                           </div>
                         </div>
                       </td>

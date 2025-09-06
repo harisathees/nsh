@@ -110,8 +110,8 @@ export const ViewRepledge = (): JSX.Element => {
               <CustomerPhoto
                 photoUrl={data.customer?.photo_url ?? undefined}
                 customerName={data.customer?.name ?? undefined}
-                className="w-16 h-16 flex-shrink-0"
-              />
+                className="w-16 h-16 flex-shrink-0 rounded-lg shadow-lg hover:shadow-xl transition-shadow"
+                />
 
               {/* Info Stack */}
               <div className="flex flex-col">
@@ -142,6 +142,7 @@ export const ViewRepledge = (): JSX.Element => {
                 <InfoRow label="Interest" value={`${data.repledge?.interest_percent || '-'}%`} />
                 <InfoRow label="Interest (After Validity)" value={`${data.repledge?.after_interest_percent || '-'}%`} />
                 <InfoRow label="Processing Fee" value={formatCurrency(data.repledge?.processing_fee)} />
+                <InfoRow label="Status" value={data.repledge?.status || '-'} />
               </CardContent>
             </Card>
 
