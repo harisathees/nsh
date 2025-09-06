@@ -1,118 +1,3 @@
-// import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { useRepledgeData } from "../../../hooks/useRepledgeDataDetails";
-// import { useBanks } from "../../../hooks/useBank"; // Import your banks hook
-// import { RepledgesSection } from "./sections/RepledgesSection/RepledgesSection";
-// import { Pagination } from "../../../components/ui/pagination";
-// import { Button } from '../../../components/ui/button';
-// import { Input } from "../../../components/ui/input";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-// import { SearchAndPaginationSection } from './sections/SearchAndPaginationSection/SearchAndPaginationSection';
-
-// export const RepledgeDetails = (): JSX.Element => {
-//   const [searchTerm, setSearchTerm] = useState('');
-//   const [bankFilter, setBankFilter] = useState('all'); // State for bank filter
-//   const [startDate, setStartDate] = useState('');     // State for date filter
-//   const [endDate, setEndDate] = useState('');         // State for date filter
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 10;
-
-//   const { banks, loading: banksLoading } = useBanks(); // Get list of banks for the dropdown
-
-//   // Pass the new filters to the hook
-//   const { data, loading, error, totalCount } = useRepledgeData(
-//     searchTerm,
-//     currentPage,
-//     itemsPerPage,
-//     bankFilter,
-//     startDate,
-//     endDate
-//   );
-
-//   const totalPages = Math.ceil(totalCount / itemsPerPage);
-
-//   const handleSearchChange = (value: string) => {
-//     setSearchTerm(value);
-//     setCurrentPage(1); // Reset to first page when searching
-//   };
-
-//   const handlePageChange = (page: number) => {
-//     setCurrentPage(page);
-//   };
-
-//   const handleClearFilters = () => {
-//     setSearchTerm('');
-//     setBankFilter('all');
-//     setStartDate('');
-//     setEndDate('');
-//     setCurrentPage(1);
-//   };
-
-//   return (
-//     <div className="bg-transparent flex flex-col items-center w-full min-h-screen px-2 sm:px-4 lg:px-6">
-//       <div className="w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl xl:max-w-4xl flex flex-col">
-//         <div className="relative w-full bg-[url(/background.png)] bg-cover bg-[50%_50%] min-h-screen sm:min-h-[763px] flex flex-col rounded-none sm:rounded-lg overflow-hidden">
-//           <SearchAndPaginationSection
-//             searchTerm={searchTerm}
-//             onSearchChange={handleSearchChange}
-//             totalCount={totalCount}
-//           />
-
-//           {/* --- NEW FILTER SECTION --- */}
-//           <div className="bg-white/50 backdrop-blur-sm p-3 m-2 rounded-xl shadow-sm space-y-3 border">
-//             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-//                 <Select value={bankFilter} onValueChange={setBankFilter} disabled={banksLoading}>
-//                     <SelectTrigger className="bg-white">
-//                       <SelectValue placeholder="Filter by Bank..." />
-//                     </SelectTrigger>
-//                     <SelectContent>
-//                         <SelectItem value="all">All Banks</SelectItem>
-//                         {banks.map(bank => (
-//                             <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>
-//                         ))}
-//                     </SelectContent>
-//                 </Select>
-//                 <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="bg-white" placeholder="Start Date" />
-//                 <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="bg-white" placeholder="End Date" />
-//             </div>
-//             {(bankFilter !== 'all' || startDate || endDate) && (
-//               <Button onClick={handleClearFilters} variant="link" className="text-sm p-0 h-auto text-indigo-600">
-//                 Clear Filters
-//               </Button>
-//             )}
-//           </div>
-
-
-//           <div className="flex-1">
-//             <RepledgesSection
-//               data={data}
-//               loading={loading}
-//               error={error}
-//               currentPage={currentPage}
-//               totalPages={totalPages}
-//               totalCount={totalCount}
-//               itemsPerPage={itemsPerPage}
-//               onPageChange={handlePageChange}
-//             />
-//           </div>
-//           {totalPages > 1 && (
-//             <div className="mt-auto bg-white">
-//               <Pagination
-//                 currentPage={currentPage}
-//                 totalPages={totalPages}
-//                 onPageChange={handlePageChange}
-//                 totalItems={totalCount}
-//                 itemsPerPage={itemsPerPage}
-//               />
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRepledgeData } from "../../../hooks/useRepledgeDataDetails";
@@ -126,230 +11,255 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Pagination } from "../../../components/ui/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 
-// --- Themed Loading Spinner (from Customers.tsx) ---
+// --- Themed Loading Spinner ---
 const GoldCoinSpinner: React.FC = () => (
-    <div className="flex flex-col items-center justify-center py-20" aria-label="Loading repledge data">
-        <svg className="coin-spinner w-16 h-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <radialGradient id="gold_gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                    <stop offset="0%" style={{ stopColor: '#FEF08A' }} />
-                    <stop offset="100%" style={{ stopColor: '#FBBF24' }} />
-                </radialGradient>
-            </defs>
-            <circle cx="50" cy="50" r="48" fill="url(#gold_gradient)" stroke="#B45309" strokeWidth="4" />
-            <text x="50" y="68" textAnchor="middle" fontSize="48" fill="#B45309" fontWeight="bold">₹</text>
-        </svg>
-        <p className="mt-4 text-sm font-semibold text-amber-800">Loading Repledge History...</p>
-    </div>
+  <div className="flex flex-col items-center justify-center py-20" aria-label="Loading repledge data">
+    <svg className="coin-spinner w-16 h-16" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="gold_gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%" style={{ stopColor: '#FEF08A' }} />
+          <stop offset="100%" style={{ stopColor: '#FBBF24' }} />
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="48" fill="url(#gold_gradient)" stroke="#B45309" strokeWidth="4" />
+      <text x="50" y="68" textAnchor="middle" fontSize="48" fill="#B45309" fontWeight="bold">₹</text>
+    </svg>
+    <p className="mt-4 text-sm font-semibold text-amber-800">Loading Repledge History...</p>
+  </div>
 );
 
 export const RepledgeDetails = (): JSX.Element => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [bankFilter, setBankFilter] = useState('all');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [showFilters, setShowFilters] = useState(false);
-    const filterRef = useRef<HTMLDivElement>(null);
-    const navigate = useNavigate();
-    const itemsPerPage = 10;
+  const [searchTerm, setSearchTerm] = useState('');
+  const [bankFilter, setBankFilter] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const itemsPerPage = 10;
 
-    const { banks, loading: banksLoading } = useBanks();
+  const { banks, loading: banksLoading } = useBanks();
 
-    const { data, loading, error, totalCount } = useRepledgeData(
-        searchTerm, currentPage, itemsPerPage, bankFilter, startDate, endDate
-    );
+  const { data, loading, error, totalCount } = useRepledgeData(
+    searchTerm, currentPage, itemsPerPage, bankFilter, startDate, endDate
+  );
 
-    const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-                setShowFilters(false);
-            }
-        };
-        if (showFilters) document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showFilters]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, bankFilter, startDate, endDate]);
-
-    const handleClearFilters = () => {
-        setSearchTerm('');
-        setBankFilter('all');
-        setStartDate('');
-        setEndDate('');
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setShowFilters(false);
-        setCurrentPage(1);
+      }
     };
-    
-    // Helper Functions
-    const formatAmount = (amount: number | null) => amount ? `₹${amount.toLocaleString("en-IN")}` : "—";
-    const formatDate = (dateString: string | null) => dateString ? new Date(dateString).toLocaleDateString("en-GB") : "No Date";
+    if (showFilters) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilters]);
 
-    const exportToExcel = () => {
-        if (!data || data.length === 0) {
-            alert("No data to export!");
-            return;
-        }
-        const exportData = data.map(rp => ({
-            'Repledge No': rp.re_no || 'N/A',
-            'Original Loan No': rp.loan_no || 'N/A',
-            'Customer Name': rp.customer_name || 'N/A',
-            'Bank': rp.bank_name || 'N/A',
-            'Repledge Date': formatDate(rp.created_at),
-            'Amount': rp.amount || 0,
-        }));
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Repledge Data');
-        XLSX.writeFile(workbook, `repledge_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    };
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, bankFilter, startDate, endDate]);
 
-    if (error) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-slate-100">
-                <div className="text-center p-10 bg-white rounded-lg shadow-md">
-                    <FiAlertCircle className="mx-auto text-5xl text-red-500 mb-4" />
-                    <p className="text-lg font-bold text-red-700">Failed to load data.</p>
-                    <p className="text-sm text-slate-600 mt-1">{error}</p>
-                </div>
-            </div>
-        );
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setBankFilter('all');
+    setStartDate('');
+    setEndDate('');
+    setShowFilters(false);
+    setCurrentPage(1);
+  };
+  
+  // Helper Functions
+  const formatAmount = (amount: number | null) => amount ? `₹${amount.toLocaleString("en-IN")}` : "—";
+  const formatDate = (dateString: string | null) => dateString ? new Date(dateString).toLocaleDateString("en-GB") : "No Date";
+
+  const exportToExcel = () => {
+    if (!data || data.length === 0) {
+      alert("No data to export!");
+      return;
     }
+    const exportData = data.map(rp => ({
+      'Repledge No': rp.re_no || 'N/A',
+      'Original Loan No': rp.loan_no || 'N/A',
+      'Customer Name': rp.customer_name || 'N/A',
+      'Bank': rp.bank_name || 'N/A',
+      'Repledge Date': formatDate(rp.created_at),
+      'Amount': rp.amount || 0,
+      'Status': rp.status || 'N/A',   // <-- Added
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Repledge Data');
+    XLSX.writeFile(workbook, `repledge_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
+  if (error) {
     return (
-        <div className="p-4 sm:p-6 bg-slate-100 min-h-screen font-sans">
-            <header className="mb-6 pb-4 border-b border-slate-200">
-                <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
-                    <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2.5">
-                        <FaFileInvoiceDollar className="text-indigo-600" />
-                        <span>Repledge History</span>
-                    </h1>
-                    {!loading && (
-                        <span className="text-sm font-semibold text-slate-600 bg-slate-200 px-3 py-1 rounded-full">
-                            {totalCount} Records
-                        </span>
-                    )}
-                </div>
-            </header>
-
-            <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
-                <div className="flex items-center gap-2 relative">
-                    <div className="relative flex-1">
-                        <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
-                        <Input type="text" placeholder="Search customer, loan no..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-100 border-transparent rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition" />
-                    </div>
-                    <div ref={filterRef} className="relative">
-                        <Button variant="outline" size="icon" onClick={() => setShowFilters(v => !v)} title="Filter" className="bg-slate-100 hover:bg-slate-200">
-                            <FiFilter className="h-4 w-4 text-slate-600" />
-                        </Button>
-                        <div className={`absolute right-0 top-full mt-2 z-10 w-72 origin-top-right transition-all duration-300 ease-in-out ${showFilters ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'}`}>
-                            <div className="bg-white border border-slate-200 rounded-lg shadow-xl p-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-sm font-semibold text-slate-800">Filter & Export</h3>
-                                    <button onClick={handleClearFilters} className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"><FiXCircle size={14} /> Clear All</button>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-600 mb-1">Bank</label>
-                                        <Select value={bankFilter} onValueChange={setBankFilter} disabled={banksLoading}>
-                                            <SelectTrigger className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500"><SelectValue placeholder="Filter by Bank..." /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="all">All Banks</SelectItem>
-                                                {banks.map(bank => <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-slate-600 mb-1">Date Range</label>
-                                        <div className="gap-2">
-                                            <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500" />
-                                            <span className="text-slate-500 text-xs">to</span>
-                                            <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500" />
-                                        </div>
-                                    </div>
-                                    <Button onClick={exportToExcel} className="mt-2 w-full bg-emerald-600 hover:bg-emerald-700"><FiDownload size={16} className="mr-2" /> Export Data</Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="space-y-3">
-                {loading ? <GoldCoinSpinner />
-                : !data || data.length === 0 ? (
-                    <div className="text-center bg-white p-10 rounded-lg shadow-sm">
-                        <FiAlertCircle className="mx-auto text-4xl text-amber-500 mb-2" />
-                        <p className="font-semibold text-slate-700">No Repledges Found</p>
-                        <p className="text-sm text-slate-500">No records match your filters.</p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                            <table className="w-full">
-                                <thead className="hidden sm:table-header-group bg-slate-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider col-span-2">Customer / Date</th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Bank</th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Loan / Repledge No</th>
-                                        <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                    {data.map((item) => (
-                                        <tr key={item.id} onClick={() => navigate(`/view-repledge/${item.loan_id}`)} className="hover:bg-slate-50/50 cursor-pointer">
-                                            {/* --- DESKTOP VIEW --- */}
-                                            <td className="hidden sm:table-cell px-4 py-3 align-top">
-                                                <div className="flex items-start gap-3">
-                                                    <Avatar className="h-10 w-10 flex-shrink-0"><AvatarImage src={item.customer_photo || undefined} className="object-cover" /><AvatarFallback>{item.customer_name?.charAt(0)}</AvatarFallback></Avatar>
-                                                    <div>
-                                                        <p className="text-sm font-semibold text-slate-800 break-words">{item.customer_name || 'N/A'}</p>
-                                                        <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at)}</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-600 align-top">{item.bank_name || '—'}</td>
-                                            <td className="hidden sm:table-cell px-4 py-3 font-mono text-xs align-top">
-                                                <p>Loan no: <span className="text-slate-700">{item.loan_no || '—'}</span></p>
-                                                <p>Repledge no: <span className="text-slate-700 font-semibold">{item.re_no || '—'}</span></p>
-                                            </td>
-                                            <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-800 font-semibold align-top text-right">{formatAmount(item.amount)}</td>
-
-                                            {/* --- MOBILE CARD VIEW --- */}
-                                            <td className="sm:hidden p-3" colSpan={4}>
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex items-center gap-3 min-w-0">
-                                                        <Avatar className="h-10 w-10 flex-shrink-0"><AvatarImage src={item.customer_photo || undefined} className="object-cover" /><AvatarFallback>{item.customer_name?.charAt(0)}</AvatarFallback></Avatar>
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-slate-800 truncate">{item.customer_name || 'N/A'}</p>
-                                                            <p className="text-xs text-slate-500">{formatDate(item.created_at)}</p>
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-base font-bold text-slate-800 flex-shrink-0 pl-2">{formatAmount(item.amount)}</p>
-                                                </div>
-                                                <div className="border-t border-slate-100 mt-3 pt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                                                    <div><p className="text-slate-500">Bank</p><p className="font-medium text-slate-700 truncate">{item.bank_name || '—'}</p></div>
-                                                    <div><p className="text-slate-500">Repledge No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
-                                                    <div className="col-span-2"><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        {totalPages > 1 && (
-                            <div className="mt-auto bg-transparent py-4">
-                                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} totalItems={totalCount} itemsPerPage={itemsPerPage} />
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
+      <div className="flex items-center justify-center h-screen bg-slate-100">
+        <div className="text-center p-10 bg-white rounded-lg shadow-md">
+          <FiAlertCircle className="mx-auto text-5xl text-red-500 mb-4" />
+          <p className="text-lg font-bold text-red-700">Failed to load data.</p>
+          <p className="text-sm text-slate-600 mt-1">{error}</p>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="p-4 sm:p-6 bg-slate-100 min-h-screen font-sans">
+      <header className="mb-6 pb-4 border-b border-slate-200">
+        <div className='flex flex-wrap items-center gap-x-4 gap-y-2'>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2.5">
+            <FaFileInvoiceDollar className="text-indigo-600" />
+            <span>Repledge History</span>
+          </h1>
+          {!loading && (
+            <span className="text-sm font-semibold text-slate-600 bg-slate-200 px-3 py-1 rounded-full">
+              {totalCount} Records
+            </span>
+          )}
+        </div>
+      </header>
+
+      {/* --- Search + Filters --- */}
+      <div className="bg-white p-4 rounded-xl shadow-sm mb-6">
+        <div className="flex items-center gap-2 relative">
+          <div className="relative flex-1">
+            <FiSearch className="absolute top-1/2 left-3 -translate-y-1/2 text-slate-400" />
+            <Input type="text" placeholder="Search customer, loan no..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-slate-100 border-transparent rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition" />
+          </div>
+          <div ref={filterRef} className="relative">
+            <Button variant="outline" size="icon" onClick={() => setShowFilters(v => !v)} title="Filter" className="bg-slate-100 hover:bg-slate-200">
+              <FiFilter className="h-4 w-4 text-slate-600" />
+            </Button>
+            <div className={`absolute right-0 top-full mt-2 z-10 w-72 origin-top-right transition-all duration-300 ease-in-out ${showFilters ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none'}`}>
+              <div className="bg-white border border-slate-200 rounded-lg shadow-xl p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-sm font-semibold text-slate-800">Filter & Export</h3>
+                  <button onClick={handleClearFilters} className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800"><FiXCircle size={14} /> Clear All</button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Bank</label>
+                    <Select value={bankFilter} onValueChange={setBankFilter} disabled={banksLoading}>
+                      <SelectTrigger className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500"><SelectValue placeholder="Filter by Bank..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Banks</SelectItem>
+                        {banks.map(bank => <SelectItem key={bank.id} value={bank.id}>{bank.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 mb-1">Date Range</label>
+                    <div className="gap-2">
+                      <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500" />
+                      <span className="text-slate-500 text-xs">to</span>
+                      <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-slate-100 border-transparent text-sm focus:ring-2 focus:ring-indigo-500" />
+                    </div>
+                  </div>
+                  <Button onClick={exportToExcel} className="mt-2 w-full bg-emerald-600 hover:bg-emerald-700"><FiDownload size={16} className="mr-2" /> Export Data</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- Table / Card --- */}
+      <div className="space-y-3">
+        {loading ? <GoldCoinSpinner />
+        : !data || data.length === 0 ? (
+          <div className="text-center bg-white p-10 rounded-lg shadow-sm">
+            <FiAlertCircle className="mx-auto text-4xl text-amber-500 mb-2" />
+            <p className="font-semibold text-slate-700">No Repledges Found</p>
+            <p className="text-sm text-slate-500">No records match your filters.</p>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <table className="w-full">
+                <thead className="hidden sm:table-header-group bg-slate-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider col-span-2">Customer / Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Bank</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Loan / Repledge No</th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data.map((item) => (
+                    <tr key={item.id} onClick={() => navigate(`/view-repledge/${item.loan_id}`)} className="hover:bg-slate-50/50 cursor-pointer">
+                      {/* --- DESKTOP VIEW --- */}
+                      <td className="hidden sm:table-cell px-4 py-3 align-top">
+                        <div className="flex items-start gap-3">
+                          <Avatar className="h-10 w-10 flex-shrink-0"><AvatarImage src={item.customer_photo || undefined} className="object-cover" /><AvatarFallback>{item.customer_name?.charAt(0)}</AvatarFallback></Avatar>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800 break-words">{item.customer_name || 'N/A'}</p>
+                            <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at)}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-600 align-top">{item.bank_name || '—'}</td>
+                      <td className="hidden sm:table-cell px-4 py-3 font-mono text-xs align-top">
+                        <p>Loan no: <span className="text-slate-700">{item.loan_no || '—'}</span></p>
+                        <p>Repledge no: <span className="text-slate-700 font-semibold">{item.re_no || '—'}</span></p>
+                      </td>
+                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-800 font-semibold align-top text-right">{formatAmount(item.amount)}</td>
+                      <td className="hidden sm:table-cell px-4 py-3 text-sm align-top">
+                        <span className={`
+                          px-2 py-1 rounded-full text-xs font-semibold
+                          ${item.status === 'active' ? 'bg-green-100 text-green-700' :
+                            item.status === 'closed' ? 'bg-red-100 text-red-700' :
+                            'bg-yellow-100 text-yellow-700'}
+                        `}>
+                          {item.status || '—'}
+                        </span>
+                      </td>
+
+                      {/* --- MOBILE CARD VIEW --- */}
+                      <td className="sm:hidden p-3" colSpan={5}>
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar className="h-10 w-10 flex-shrink-0"><AvatarImage src={item.customer_photo || undefined} className="object-cover" /><AvatarFallback>{item.customer_name?.charAt(0)}</AvatarFallback></Avatar>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800 truncate">{item.customer_name || 'N/A'}</p>
+                              <p className="text-xs text-slate-500">{formatDate(item.created_at)}</p>
+                            </div>
+                          </div>
+                          <p className="text-base font-bold text-slate-800 flex-shrink-0 pl-2">{formatAmount(item.amount)}</p>
+                        </div>
+                        <div className="border-t border-slate-100 mt-3 pt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                          <div><p className="text-slate-500">Bank</p><p className="font-medium text-slate-700 truncate">{item.bank_name || '—'}</p></div>
+                          <div><p className="text-slate-500">Repledge No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
+                          <div><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
+                          <div>
+                            <p className="text-slate-500">Status</p>
+                            <p className={`
+                              text-xs font-semibold px-2 py-1 rounded-full inline-block
+                              ${item.status === 'active' ? 'bg-green-100 text-green-700' :
+                                item.status === 'closed' ? 'bg-red-100 text-red-700' :
+                                'bg-yellow-100 text-yellow-700'}
+                            `}>
+                              {item.status || '—'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {totalPages > 1 && (
+              <div className="mt-auto bg-transparent py-4">
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} totalItems={totalCount} itemsPerPage={itemsPerPage} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
 };

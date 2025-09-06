@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS repledge_entries (
   amount numeric(10,2),
   processing_fee numeric(10,2) DEFAULT 0,
   bank_name text,
+  status text DEFAULT 'active' CHECK (status IN ('active', 'closed', 'pending')),
   interest_percent numeric(5,2),
   validity_period integer,
   after_interest_percent numeric(5,2),

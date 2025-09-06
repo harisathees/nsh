@@ -33,6 +33,7 @@
 CREATE TABLE IF NOT EXISTS repledge_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   bank_name text,
+  status text DEFAULT 'active' CHECK (status IN ('active', 'closed', 'pending')),
   jewel_details text,
   jewel_name text,
   pieces integer,

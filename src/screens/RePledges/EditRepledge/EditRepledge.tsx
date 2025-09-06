@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
@@ -28,7 +28,8 @@ export const EditRepledge = (): JSX.Element => {
     payment_method: '',
     start_date: '',
     end_date: '',
-    bank_id: ''
+    bank_id: '',
+    status: ''
   });
 
   // Load banks for dropdown
@@ -61,7 +62,8 @@ export const EditRepledge = (): JSX.Element => {
         payment_method: data.repledge.payment_method || '',
         start_date: data.repledge.start_date || '',
         end_date: data.repledge.end_date || '',
-        bank_id: data.repledge.bank_id || ''
+        bank_id: data.repledge.bank_id || '',
+        status: data.repledge.status || ''
       });
     }
   }, [data.repledge]);
@@ -95,6 +97,7 @@ export const EditRepledge = (): JSX.Element => {
         start_date: formData.start_date || null,
         end_date: formData.end_date || null,
         bank_id: formData.bank_id || null,
+        status: formData.status || null,
         updated_at: new Date().toISOString()
       };
 
@@ -122,7 +125,7 @@ export const EditRepledge = (): JSX.Element => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/')}
-            className="text-white hover:bg-white/10 p-2"
+            className="text-white hover:bg-white p-2 rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
@@ -148,7 +151,7 @@ export const EditRepledge = (): JSX.Element => {
           variant="ghost"
           size="sm"
           onClick={() => navigate(`/view-repledge/${loanId}`)}
-          className="text-white hover:bg-white/10 p-2"
+          className="text-white hover:bg-white p-2 rounded-full"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -302,6 +305,21 @@ export const EditRepledge = (): JSX.Element => {
                       <option value="Bank Transfer">Bank Transfer</option>
                       <option value="Cheque">Cheque</option>
                       <option value="UPI">UPI</option>
+                    </select>
+                  </div>
+
+                  {/* Status */}
+                  <div className="space-y-2">
+                    <label className="font-inter font-normal text-gray-1 text-xs">Status:</label>
+                    <select
+                      value={formData.status}
+                      onChange={(e) => handleInputChange('status', e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Closed">Closed</option>
                     </select>
                   </div>
 

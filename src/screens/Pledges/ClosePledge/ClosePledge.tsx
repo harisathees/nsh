@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "../../../lib/supabase";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { ArrowLeft, CheckCircle2, Loader2, AlertTriangle, ShieldCheck, FileText, Calculator, BarChart2 } from 'lucide-react';

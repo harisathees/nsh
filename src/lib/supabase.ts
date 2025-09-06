@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { ReactNode } from "react";
+
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -229,45 +231,8 @@ export type Database = {
   }
 }
 
-
-// Re pledge
-
-// export interface Loan {
-//   id: string;
-//   loan_no: string;
-//   customer_id: string;
-//   date: string;
-//   amount: number;
-//   interest_rate: number;
-//   validity_months: number;
-//   interest_taken: boolean;
-//   payment_method: string;
-//   processing_fee: number;
-//   estimated_amount: number;
-//   status: string;
-//   created_at: string;
-//   updated_at: string;
-//   duedate: string;
-//   metal_rate: number;
-// }
-
-// export interface Jewel {
-//   id: string;
-//   loan_id: string;
-//   type: string;
-//   quality: string;
-//   description: string;
-//   pieces: number;
-//   weight: number;
-//   stone_weight: number;
-//   net_weight: number;
-//   faults: string;
-//   image_url: string;
-//   created_at: string;
-//   updated_at: string;
-// }
-
 export interface RepledgeEntry {
+  [x: string]: ReactNode;
   id: string;
   loan_id: string;
   loan_no: string;
@@ -315,6 +280,7 @@ export interface RepledgeEntry {
   bank_id: string
   created_at: string
   updated_at: string
+  status: string
 }
 
 
