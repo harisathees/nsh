@@ -117,7 +117,7 @@ export const EditRepledge = (): JSX.Element => {
   if (error) {
     return (
       <div className="bg-white min-h-screen w-full max-w-[393px] mx-auto lg:max-w-2xl">
-        <header className="bg-black rounded-b-[47px] h-[73px] flex items-center justify-between px-6">
+        <header className="bg-black rounded-b-[47px] h-[53px] flex items-center justify-between px-6">
           <Button
             variant="ghost"
             size="sm"
@@ -126,7 +126,7 @@ export const EditRepledge = (): JSX.Element => {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="font-header-heading-semibold-heading-5-semibold font-[number:var(--header-heading-semibold-heading-5-semibold-font-weight)] text-white text-[length:var(--header-heading-semibold-heading-5-semibold-font-size)] text-center tracking-[var(--header-heading-semibold-heading-5-semibold-letter-spacing)] leading-[var(--header-heading-semibold-heading-5-semibold-line-height)] [font-style:var(--header-heading-semibold-heading-5-semibold-font-style)]">
+          <h1 className="font-header-heading-semibold-heading-5 font-[number:var(--header-heading-semibold-heading-5-semibold-font-weight)] text-white text-[length:var(--header-heading-semibold-heading-5-semibold-font-size)] text-center tracking-[var(--header-heading-semibold-heading-5-semibold-letter-spacing)] leading-[var(--header-heading-semibold-heading-5-semibold-line-height)] [font-style:var(--header-heading-semibold-heading-5-semibold-font-style)]">
             Edit Repledge
           </h1>
           <div className="w-9"></div>
@@ -143,7 +143,7 @@ export const EditRepledge = (): JSX.Element => {
 
   return (
     <div className="bg-white min-h-screen w-full max-w-[393px] mx-auto lg:max-w-2xl">
-      <header className="bg-black rounded-b-[47px] h-[73px] flex items-center justify-between px-6">
+      <header className="bg-black rounded-b-[47px] h-[53px] flex items-center justify-between px-6">
         <Button
           variant="ghost"
           size="sm"
@@ -152,13 +152,14 @@ export const EditRepledge = (): JSX.Element => {
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="font-header-heading-semibold-heading-5-semibold font-[number:var(--header-heading-semibold-heading-5-semibold-font-weight)] text-white text-[length:var(--header-heading-semibold-heading-5-semibold-font-size)] text-center tracking-[var(--header-heading-semibold-heading-5-semibold-letter-spacing)] leading-[var(--header-heading-semibold-heading-5-semibold-line-height)] [font-style:var(--header-heading-semibold-heading-5-semibold-font-style)]">
+        <h1 className="font-header-heading-semibold-heading-5 font-[number:var(--header-heading-semibold-heading-5-semibold-font-weight)] text-white text-[length:var(--header-heading-semibold-heading-5-semibold-font-size)] text-center tracking-[var(--header-heading-semibold-heading-5-semibold-letter-spacing)] leading-[var(--header-heading-semibold-heading-5-semibold-line-height)] [font-style:var(--header-heading-semibold-heading-5-semibold-font-style)]">
           Edit Repledge
         </h1>
         <div className="w-9"></div>
       </header>
+      
 
-      <main className="px-6 py-4 space-y-6 pb-32">
+      <main className="px-1 py-4 space-y-6 pb-32">
         {loading ? (
           <>
             <LoadingCard title="Loading repledge details..." />

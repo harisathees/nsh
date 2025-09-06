@@ -594,6 +594,8 @@ const isLoanAlreadyRepledged = async (loanNo: string): Promise<boolean> => {
   }
 };
 
+
+
 // ---------------------- MAIN COMPONENT ----------------------
 export const RePledge = (): JSX.Element => {
   const {
@@ -638,6 +640,22 @@ export const RePledge = (): JSX.Element => {
   const [showBankManagement, setShowBankManagement] = useState(false);
 
   const [repledgeError, setRepledgeError] = useState('');
+
+  // Add this new handler function inside your RePledge component
+const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const amount = parseFloat(e.target.value) || 0;
+
+  // Calculate the fee with your formula and cap it at 200
+  const calculatedFee = Math.round(Math.min(amount * 0.0012, 200));
+
+  // Update the form state for both fields
+  const updatedForms = [...forms];
+  const currentFormState = { ...updatedForms[activeFormIndex] };
+  currentFormState.amount = amount;
+  currentFormState.processingFee = calculatedFee;
+  updatedForms[activeFormIndex] = currentFormState;
+  setForms(updatedForms);
+};
 
   const currentForm = forms[activeFormIndex] || initialFormState;
   // ---------------------- EFFECTS ----------------------
@@ -743,7 +761,7 @@ export const RePledge = (): JSX.Element => {
         grossWeight: result.totals.gross_weight,
         stoneWeight: result.totals.stone_weight,
         amount: result.loan.amount,
-        processingFee: result.loan.processing_fee,
+        processingFee: Math.round(Math.min(result.loan.amount * 0.0012, 200)),
       };
       setForms(updatedForms);
       toast.success(`Loaded details for loan ${result.loan.loan_no}`);
@@ -838,7 +856,7 @@ export const RePledge = (): JSX.Element => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-md mx-auto bg-white shadow-sm">
-        <header className="w-full h-20 bg-black rounded-b-3xl flex items-center justify-center relative px-4">
+        <header className="w-full h-12 bg-black rounded-b-3xl flex items-center justify-center relative px-5">
           <h1 className="text-white text-xl font-bold tracking-wide">Re-Pledge Entry</h1>
           <Button
             onClick={() => setShowBankManagement(true)}
@@ -850,7 +868,7 @@ export const RePledge = (): JSX.Element => {
           </Button>
         </header>
 
-        <div className="p-2 space-y-6">
+        <div className="p-1 space-y-4">
           {/* --- Bank & Details Section --- */}
           <Card className="bg-white border rounded-lg">
             <CardContent className="p-4 space-y-4">
@@ -978,13 +996,15 @@ export const RePledge = (): JSX.Element => {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
+                  {/* Amount Input: Now uses the new handler */}
                   <div className="space-y-1.5">
                     <Label htmlFor="amount" className="text-gray-300">Amount</Label>
-                    <Input id="amount" type="number" placeholder="₹" value={currentForm.amount || ""} onChange={(e) => updateFormData(activeFormIndex, 'amount', parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-lg text-center" />
+                    <Input id="amount" type="number" placeholder="₹" value={currentForm.amount || ""} onChange={handleAmountChange} className="bg-white text-black rounded-lg text-center" />
                   </div>
+                  {/* Processing Fee Input: Now read-only and styled differently */}
                   <div className="space-y-1.5">
                     <Label htmlFor="proc-fee" className="text-gray-300">Proc. Fee</Label>
-                    <Input id="proc-fee" type="number" placeholder="₹" value={currentForm.processingFee || ""} onChange={(e) => updateFormData(activeFormIndex, 'processingFee', parseFloat(e.target.value) || 0)} className="bg-white text-black rounded-lg text-center" />
+                    <Input id="proc-fee" type="number" placeholder="₹" value={currentForm.processingFee || ""} readOnly className="bg-gray-200 text-black rounded-lg text-center cursor-not-allowed" />
                   </div>
                 </div>
               </div>

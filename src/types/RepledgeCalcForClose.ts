@@ -19,7 +19,10 @@ export const calculateRepledgeClose = (inputs: CalculationInputs): CalculationRe
   const { startDate, endDate, amount, interestRate, calculationMethod } = inputs;
   
   // Calculate duration in days
-  const duration = differenceInDays(new Date(endDate), new Date(startDate));
+  let duration = differenceInDays(new Date(endDate), new Date(startDate));
+  if (duration <= 7) {
+    duration = 7; // Minimum duration of 7 days
+  }
   
   let finalInterestRate = interestRate;
   let calculatedInterest = 0;
@@ -29,7 +32,7 @@ export const calculateRepledgeClose = (inputs: CalculationInputs): CalculationRe
       // Simple interest calculation: (Principal × Rate × Time) / 100
       // Time is in days, so we divide by 365 to get yearly rate
       finalInterestRate = interestRate;
-      calculatedInterest = (amount * interestRate * duration) / (365 * 100);
+      calculatedInterest = (amount * interestRate * duration) / (360 * 100);
       break;
       
     case 'method_2':

@@ -295,7 +295,7 @@ export const RepledgeDetails = (): JSX.Element => {
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider col-span-2">Customer / Date</th>
                                         <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Bank</th>
-                                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Loan / Repledge No</th>
+                                        <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Loan / Repledge No</th>
                                         <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
                                     </tr>
                                 </thead>
@@ -320,7 +320,7 @@ export const RepledgeDetails = (): JSX.Element => {
                                             <td className="hidden sm:table-cell px-4 py-3 text-sm text-slate-800 font-semibold align-top text-right">{formatAmount(item.amount)}</td>
 
                                             {/* --- MOBILE CARD VIEW --- */}
-                                            <td className="sm:hidden p-3" colSpan={4}>
+                                            <td className="sm:hidden p-4" colSpan={4}>
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <Avatar className="h-10 w-10 flex-shrink-0"><AvatarImage src={item.customer_photo || undefined} className="object-cover" /><AvatarFallback>{item.customer_name?.charAt(0)}</AvatarFallback></Avatar>
@@ -331,9 +331,9 @@ export const RepledgeDetails = (): JSX.Element => {
                                                     </div>
                                                     <p className="text-base font-bold text-slate-800 flex-shrink-0 pl-2">{formatAmount(item.amount)}</p>
                                                 </div>
-                                                <div className="border-t border-slate-100 mt-3 pt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                                <div className="border-t border-slate-100 mt-3 pt-5 grid grid-cols-4 gap-x-8 gap-y-0 text-xs">
                                                     <div><p className="text-slate-500">Bank</p><p className="font-medium text-slate-700 truncate">{item.bank_name || '—'}</p></div>
-                                                    <div><p className="text-slate-500">Repledge No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
+                                                    <div><p className="text-slate-500">Re No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
                                                     <div className="col-span-2"><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
                                                 </div>
                                             </td>
