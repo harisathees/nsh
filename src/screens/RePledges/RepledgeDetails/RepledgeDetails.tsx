@@ -231,14 +231,14 @@ export const RepledgeDetails = (): JSX.Element => {
                           </div>
                           <p className="text-base font-bold text-slate-800 flex-shrink-0 pl-2">{formatAmount(item.amount)}</p>
                         </div>
-                        <div className="border-t border-slate-100 mt-3 pt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                        <div className="border-t border-slate-100 mt-3 pt-3 grid grid-cols-4 gap-x-4 gap-y-2 text-xs">
                           <div><p className="text-slate-500">Bank</p><p className="font-medium text-slate-700 truncate">{item.bank_name || '—'}</p></div>
-                          <div><p className="text-slate-500">Repledge No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
+                          <div><p className="text-slate-500">Re.No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
                           <div><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
                           <div>
                             <p className="text-slate-500">Status</p>
                           <span
-                             className={`inline-block px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm
+                             className={`inline-block px-1.5 py-0.2 rounded-full text-xs font-semibold shadow-sm
                               ${item.status?.toLowerCase() === 'active'
                               ? 'bg-green-50 text-green-700 ring-1 ring-green-200'
                               : item.status?.toLowerCase() === 'closed'

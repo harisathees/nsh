@@ -406,7 +406,7 @@ const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                   <Input id="end-date" type="date" value={currentForm.endDate} readOnly className="h-10 bg-gray-200 rounded-lg text-center text-gray-600 cursor-not-allowed" />
                 </div>
                 <div className="space-y-1.5">
-                    <Label htmlFor="status" className="text-gray-200">Status</Label>
+                    <Label htmlFor="status" >Status</Label>
                     <Select
                      value={currentForm.status}
                      onValueChange={(value) => updateFormData(activeFormIndex, "status", value)}
@@ -416,8 +416,8 @@ const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
+                      {/* <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>
