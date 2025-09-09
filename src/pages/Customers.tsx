@@ -383,7 +383,7 @@ export const Customers: React.FC = () => {
             {totalPages > 1 && (
               <div className="p-4 flex items-center justify-between">
                 <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 rounded-lg shadow-sm text-sm font-semibold text-slate-600 disabled:opacity-50 transition">
-                  <FiChevronLeft size={16} /> Previous
+                  <FiChevronLeft size={16} /> Prev
                 </button>
                 <span className="text-sm font-semibold text-slate-500">Page {currentPage} of {totalPages}</span>
                 <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 rounded-lg shadow-sm text-sm font-semibold text-slate-600 disabled:opacity-50 transition">
