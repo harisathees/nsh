@@ -8,7 +8,6 @@ import { FaFileInvoiceDollar } from 'react-icons/fa';
 import { Button } from '../../../components/ui/button';
 import { Input } from "../../../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
-import { Pagination } from "../../../components/ui/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 
 // --- Themed Loading Spinner ---
@@ -28,6 +27,88 @@ const GoldCoinSpinner: React.FC = () => (
   </div>
 );
 
+/* -------------------------
+   Local PaginationNav
+   - deterministic behavior
+   - uses 1-based page numbers
+   ------------------------- */
+interface PaginationNavProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems?: number;
+  itemsPerPage?: number;
+}
+const PaginationNav: React.FC<PaginationNavProps> = ({ currentPage, totalPages, onPageChange, totalItems, itemsPerPage }) => {
+  if (totalPages <= 1) return null;
+
+  const buildPages = (cur: number, total: number, maxButtons = 5) => {
+    const pages: number[] = [];
+    let start = Math.max(1, cur - Math.floor(maxButtons / 2));
+    let end = Math.min(total, start + maxButtons - 1);
+    start = Math.max(1, end - maxButtons + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
+
+  const pages = buildPages(currentPage, totalPages, 5);
+
+  return (
+    <div className="flex items-center justify-between px-4 py-3">
+      <div className="text-xs text-slate-600">
+        {totalItems !== undefined && itemsPerPage !== undefined
+          ? `Showing page ${currentPage} of ${totalPages} — ${totalItems} records`
+          : `Page ${currentPage} of ${totalPages}`}
+      </div>
+
+      <nav className="inline-flex items-center space-x-2" aria-label="Pagination">
+        <button
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'}`}
+          aria-label="Previous page"
+        >
+          Prev
+        </button>
+
+        {pages[0] > 1 && (
+          <>
+            <button onClick={() => onPageChange(1)} className="px-3 py-1 rounded-md text-sm hover:bg-slate-100">1</button>
+            {pages[0] > 2 && <span className="px-2">…</span>}
+          </>
+        )}
+
+        {pages.map(p => (
+          <button
+            key={p}
+            onClick={() => onPageChange(p)}
+            aria-current={p === currentPage ? 'page' : undefined}
+            className={`px-3 py-1 rounded-md text-sm font-medium ${p === currentPage ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100'}`}
+          >
+            {p}
+          </button>
+        ))}
+
+        {pages[pages.length - 1] < totalPages && (
+          <>
+            {pages[pages.length - 1] < totalPages - 1 && <span className="px-2">…</span>}
+            <button onClick={() => onPageChange(totalPages)} className="px-3 py-1 rounded-md text-sm hover:bg-slate-100">{totalPages}</button>
+          </>
+        )}
+
+        <button
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 rounded-md text-sm font-medium ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100'}`}
+          aria-label="Next page"
+        >
+          Next
+        </button>
+      </nav>
+    </div>
+  );
+};
+
 export const RepledgeDetails = (): JSX.Element => {
   const [searchTerm, setSearchTerm] = useState('');
   const [bankFilter, setBankFilter] = useState('all');
@@ -41,12 +122,16 @@ export const RepledgeDetails = (): JSX.Element => {
 
   const { banks, loading: banksLoading } = useBanks();
 
+  // NOTE: We pass currentPage (1-based) to the hook. If your hook expects an offset,
+  // change the second argument to `(currentPage - 1) * itemsPerPage`.
   const { data, loading, error, totalCount } = useRepledgeData(
     searchTerm, currentPage, itemsPerPage, bankFilter, startDate, endDate
   );
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  // compute totalPages safely (0 when no data)
+  const totalPages = totalCount ? Math.ceil(Number(totalCount) / itemsPerPage) : 0;
 
+  // close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
@@ -57,9 +142,17 @@ export const RepledgeDetails = (): JSX.Element => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showFilters]);
 
+  // reset page when filters/search/date change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, bankFilter, startDate, endDate]);
+
+  // clamp currentPage whenever totalCount/totalPages changes
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
 
   const handleClearFilters = () => {
     setSearchTerm('');
@@ -69,7 +162,7 @@ export const RepledgeDetails = (): JSX.Element => {
     setShowFilters(false);
     setCurrentPage(1);
   };
-  
+
   // Helper Functions
   const formatAmount = (amount: number | null) => amount ? `₹${amount.toLocaleString("en-IN")}` : "—";
   const formatDate = (dateString: string | null) => dateString ? new Date(dateString).toLocaleDateString("en-GB") : "No Date";
@@ -86,7 +179,7 @@ export const RepledgeDetails = (): JSX.Element => {
       'Bank': rp.bank_name || 'N/A',
       'Repledge Date': formatDate(rp.created_at),
       'Amount': rp.amount || 0,
-      'Status': rp.status || 'N/A',   // <-- Added
+      'Status': rp.status || 'N/A',
     }));
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
@@ -105,6 +198,7 @@ export const RepledgeDetails = (): JSX.Element => {
       </div>
     );
   }
+
   return (
     <div className="p-4 sm:p-6 bg-slate-100 min-h-screen font-sans">
       <header className="mb-6 pb-4 border-b border-slate-200">
@@ -115,7 +209,7 @@ export const RepledgeDetails = (): JSX.Element => {
           </h1>
           {!loading && (
             <span className="text-sm font-semibold text-slate-600 bg-slate-200 px-3 py-1 rounded-full">
-              {totalCount} Records
+              {totalCount ?? 0} Records
             </span>
           )}
         </div>
@@ -211,12 +305,10 @@ export const RepledgeDetails = (): JSX.Element => {
                           ${item.status?.toLowerCase() === 'active' ? 'bg-green-50 text-green-700 ring-1 ring-green-200'
                           : item.status?.toLowerCase() === 'closed'
                           ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
-                        : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}
-                        `}
+                        : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}`}
                         >
                         {item.status || '—'}
                         </span>
-
                       </td>
 
                       {/* --- MOBILE CARD VIEW --- */}
@@ -243,11 +335,10 @@ export const RepledgeDetails = (): JSX.Element => {
                               ? 'bg-green-50 text-green-700 ring-1 ring-green-200'
                               : item.status?.toLowerCase() === 'closed'
                               ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
-                              : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}
-                            `}
+                              : 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200'}`}
                             >
                               {item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : '—'}
-                          </span>                            
+                          </span>
                           </div>
                         </div>
                       </td>
@@ -256,11 +347,17 @@ export const RepledgeDetails = (): JSX.Element => {
                 </tbody>
               </table>
             </div>
-            {totalPages > 1 && (
-              <div className="mt-auto bg-transparent py-4">
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} totalItems={totalCount} itemsPerPage={itemsPerPage} />
-              </div>
-            )}
+
+            {/* ---------- Pagination ---------- */}
+            <div className="mt-auto bg-transparent py-4">
+              <PaginationNav
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={(p) => setCurrentPage(p)}
+                totalItems={Number(totalCount ?? 0)}
+                itemsPerPage={itemsPerPage}
+              />
+            </div>
           </>
         )}
       </div>
