@@ -42,7 +42,7 @@ export const ViewRepledge = (): JSX.Element => {
       if (error) throw error;
 
       alert('Repledge entry deleted successfully');
-      navigate('/');
+      navigate('/re-pledge-entry/details');
     } catch (err) {
       alert('Failed to delete repledge entry: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }

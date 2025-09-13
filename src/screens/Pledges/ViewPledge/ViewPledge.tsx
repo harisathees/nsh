@@ -114,7 +114,6 @@ export const ViewPledge = (): JSX.Element => {
               <PrinterIcon className="w-5 h-5" />
               Print 
             </button>
-            {/* --- END NEW --- */}
           </div>
         </div>
       </div>

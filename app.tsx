@@ -20,6 +20,7 @@ import { RepledgeDetails } from "./src/screens/RePledges/RepledgeDetails/Repledg
 import { ViewRepledge } from "./src/screens/RePledges/ViewRepledge";
 import { EditRepledge } from "./src/screens/RePledges/EditRepledge";
 import { CloseRepledge } from "./src/screens/RePledges/CloseRepledge/CloseRepledge";
+import CashBook from './src/components/cashbook/CashBook';
 
 // ProtectedRoute
 import { ProtectedRoute } from "./src/screens/Login/auth/ProtectedRoute";
@@ -40,9 +41,9 @@ export default function App() {
         {/* Not logged in route */}
         <Route path="/not-logged-in" element={<NotLoggedIn />} />
 
-          {/* 404 Route */}
+        {/* 404 Route */}
         <Route path="*" element={<GoldLoan404 />} />
-    
+
         {/* Routes outside Layout (protected) */}
         <Route
           path="/create-pledge"
@@ -164,6 +165,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Customers />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cashbook"
+            element={
+              <ProtectedRoute>
+                <CashBook />
               </ProtectedRoute>
             }
           />
