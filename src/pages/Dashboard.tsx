@@ -104,6 +104,15 @@ export function Dashboard() {
                 <motion.div variants={itemVariants}>
                     <ConsolidatedStatsCard title="Closed Loans" icon={<CheckCircle size={24} />} principal={formatCurrency(stats.closedPrincipal)} interest={formatCurrency(stats.collectedInterest)} count={stats.closedLoansCount} status="closed" />
                 </motion.div>
+                {/* <motion.div variants={itemVariants}>
+                    <ConsolidatedStatsCard title="Total Repledges" icon={<DollarSign size={24} />} principal={formatCurrency(stats.totalPrincipal)} interest={formatCurrency(stats.totalInterest)} count={stats.totalLoansCount} status="total" />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <ConsolidatedStatsCard title="Active Repledges" icon={<Clock size={24} />} principal={formatCurrency(stats.activePrincipal)} interest={formatCurrency(stats.pendingInterest)} count={stats.activeLoansCount} status="active" />
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                    <ConsolidatedStatsCard title="Closed Repledges" icon={<CheckCircle size={24} />} principal={formatCurrency(stats.closedPrincipal)} interest={formatCurrency(stats.collectedInterest)} count={stats.closedLoansCount} status="closed" />
+                </motion.div> */}
                 <motion.div variants={itemVariants}>
                     <ConsolidatedStatsCard title="Overdue Loans" icon={<AlertTriangle size={24} />} principal={formatCurrency(stats.overduePrincipal)} interest={formatCurrency(stats.overdueInterest)} count={stats.overdueLoansCount} status="overdue" />
                 </motion.div>
