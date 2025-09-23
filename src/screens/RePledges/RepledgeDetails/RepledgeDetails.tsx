@@ -328,7 +328,7 @@ export const RepledgeDetails = (): JSX.Element => {
                           <div><p className="text-slate-500">Re.No</p><p className="font-mono font-semibold text-slate-700">{item.re_no || '—'}</p></div>
                           <div><p className="text-slate-500">Loan No</p><p className="font-mono text-slate-700">{item.loan_no || '—'}</p></div>
                           <div>
-                            <p className="text-slate-500">Status</p>
+                            <p className="text-slate-500 ">Status</p>
                           <span
                              className={`inline-block px-1.5 py-0.2 rounded-full text-xs font-semibold shadow-sm
                               ${item.status?.toLowerCase() === 'active'

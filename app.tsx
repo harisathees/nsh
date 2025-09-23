@@ -22,7 +22,7 @@ import { EditRepledge } from "./src/screens/RePledges/EditRepledge";
 import { CloseRepledge } from "./src/screens/RePledges/CloseRepledge/CloseRepledge";
 
 // ProtectedRoute
-import { ProtectedRoute } from "./src/screens/Login/auth/ProtectedRoute";
+// import { ProtectedRoute } from "./src/screens/Login/auth/ProtectedRoute";
 import GoldLoan404 from "./src/screens/404Page/404page";
 import { NotLoggedIn } from "./src/screens/Login/NotLoggedIn/NotLoggedIn";
 
@@ -35,53 +35,53 @@ export default function App() {
         <Route path="/" element={<RedirectBasedOnAuth />} />
 
         {/* Public login route */}
-        <Route path="/login" element={<Login />} />
+        {/* <Route path="/login" element={<Login />} /> */}
 
         {/* Not logged in route */}
-        <Route path="/not-logged-in" element={<NotLoggedIn />} />
+        {/* <Route path="/not-logged-in" element={<NotLoggedIn />} /> */}
 
           {/* 404 Route */}
-        <Route path="*" element={<GoldLoan404 />} />
+        {/* <Route path="*" element={<GoldLoan404 />} /> */}
     
         {/* Routes outside Layout (protected) */}
         <Route
           path="/create-pledge"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <CreatePledge />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/view-pledge/:loanId"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ViewPledge />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/edit-pledge/:loanId"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <EditPledge />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/close-pledge/:loanId"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ClosePledge />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
         <Route
           path="/print-notice/:loanId"
           element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <NoticePrint />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         />
 
@@ -90,97 +90,97 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Dashboard />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/reports"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Reports />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/re-pledge-entry/add"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <RePledge />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/re-pledge-entry/add-bank"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <BankManagement />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/re-pledge-entry/details"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <RepledgeDetails />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/view-repledge/:loanId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <ViewRepledge />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/edit-repledge/:loanId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <EditRepledge />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/close-repledge/:loanId"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <CloseRepledge />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/pledge-entry"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <PledgeEntry />
-              </ProtectedRoute>
+              // </ProtectedRoute>
             }
           />
           <Route
             path="/customers"
             element={
-              <ProtectedRoute>
+                // <ProtectedRoute>
                 <Customers />
-              </ProtectedRoute>
+                // </ProtectedRoute>
             }
           />
           <Route
             path="/settings"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <Settings />
-              </ProtectedRoute>
+              /* </ProtectedRoute> */
             }
           />
           <Route
             path="/settings/metal-rates"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <MetalRatesSettings />
-              </ProtectedRoute>
+              /* </ProtectedRoute> */
             }
           />
         </Route>
