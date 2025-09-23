@@ -59,6 +59,22 @@ export const LoanDetailsSection = ({ loan }: LoanDetailsSectionProps): JSX.Eleme
 
         {/* Form Fields */}
         <div className="space-y-4 mb-6">
+          {loan.metal_rate && (
+          <div className="flex justify-between items-center">
+            <span className="text-sm font-medium text-gray-500">Metal Rate (at pledge)</span>
+            
+            {/* The 'span' below now has conditional classes */}
+            <span 
+              className={`px-2 py-1 text-sm font-semibold rounded-md ${
+                loan.metal_rate < 1000 
+                  ? 'bg-slate-200 text-slate-800' // Silver style
+                  : 'bg-amber-100 text-amber-800'  // Gold style
+              }`}
+            >
+              ₹{new Intl.NumberFormat('en-IN').format(loan.metal_rate)} / gram
+            </span>
+          </div>
+        )}
           {loanFields.map((field) => (
             <div key={field.id} className="space-y-1">
               <label className="text-sm font-medium text-gray-700" htmlFor={field.id}>

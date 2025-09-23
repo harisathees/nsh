@@ -6,6 +6,42 @@ import { FiShare2, FiLoader } from 'react-icons/fi'; // <-- Added icon imports
 import bg1 from '../../assets/front.jpg';
 import bg2 from '../../assets/back.jpg';
 
+
+const CheckIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="green"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '4px' }}
+  >
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>
+);
+
+const CrossIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="red"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: '4px' }}
+  >
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
 // Spinner Component (no changes)
 const GoldCoinSpinner: React.FC<{ text?: string }> = ({ text = "Loading pledge data..." }) => (
   <div className="flex flex-col items-center justify-center py-20" aria-label="Loading">
@@ -16,7 +52,7 @@ const GoldCoinSpinner: React.FC<{ text?: string }> = ({ text = "Loading pledge d
           <stop offset="100%" style={{ stopColor: '#FBBF24' }} />
         </radialGradient>
       </defs>
-      <circle cx="50" cy="50" r="48" fill="url(#gold_gradient)" stroke="#B45309" strokeWidth="4"/>
+      <circle cx="50" cy="50" r="48" fill="url(#gold_gradient)" stroke="#B45309" strokeWidth="4" />
       <text x="50" y="68" textAnchor="middle" fontSize="48" fill="#B45309" fontWeight="bold">₹</text>
     </svg>
     <p className="mt-4 text-sm font-semibold text-amber-800">{text}</p>
@@ -108,6 +144,7 @@ const NoticePrint = () => {
         duedate: formatDate(loan.duedate),
         weight: jewel?.net_weight,
         interest: loan?.interest_rate,
+        interestTaken: loan.interest_taken,
         jewelName: jewel?.description || 'N/A',
         faults: jewel?.faults || 'N/A',
         quality: jewel?.quality || 'N/A',
@@ -294,7 +331,7 @@ const NoticePrint = () => {
             fontSize: '15px', zIndex: 1, whiteSpace: 'nowrap',
             overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '150mm'
           }}>
-            <b>{field.label}</b>
+            <b> {field.label}</b>
           </div>
         ))}
       </div>
@@ -316,7 +353,9 @@ const fields = (data: any) => [
   { top: '100.5mm', left: '196mm', label: `Due :${data.duedate}` },
   { top: '100.5mm', left: '188mm', label: `G:${data.goldRate}` },
   { top: '121.5mm', left: '188mm', label: `S:${data.silverRate}` },
-  { top: '2.5mm', left: '188mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+  { top: '2.5mm', left: '187mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+  { top: '44mm', left: '187mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon /> : <CrossIcon />}</span> },
+
   { top: '2.5mm', left: '181mm', label: `கடன் எண்:${data.itemNo}` },
   { top: '2.5mm', left: '174mm', label: `தரம்:${data.quality}` },
   { top: '2.5mm', left: '167mm', label: `Pcs: ${data.count}` },
@@ -333,6 +372,7 @@ const fields = (data: any) => [
   { top: '100.5mm', left: '95mm', label: `Date:${data.date}` },
   { top: '100.5mm', left: '90mm', label: `Due :${data.duedate}` },
   { top: '2.5mm', left: '80mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+  { top: '44mm', left: '80mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon /> : <CrossIcon />}</span> },
   { top: '2.5mm', left: '70mm', label: `கடன் எண்:${data.itemNo}` },
   { top: '2.5mm', left: '62mm', label: `Pcs: ${data.count}` },
   { top: '2.5mm', left: '54mm', label: `வட்டி: ${data.interest}%` },
@@ -341,7 +381,9 @@ const fields = (data: any) => [
   { top: '44mm', left: '70mm', label: `பெயர்: ${data.name}` },
   { top: '44mm', left: '62mm', label: `தொகை: ₹${data.amount}/-` },
   { top: '44mm', left: '54mm', label: `எடை: ${data.weight}g` },
-  { top: '100.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
+  { top: '95.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
+  // { top: '250.5mm', left: '30mm', label: `Int. Taken: ${data.interestTaken ? 'Yes' : 'No'}` },
+
 ];
 
 export default NoticePrint;

@@ -14,7 +14,9 @@ import {
   Building2,
   RefreshCw,
   Users2Icon,
-  Users2
+  Users2,
+  BookOpenText
+  
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -44,6 +46,7 @@ const navigation: NavigationItem[] = [
   },
   { name: 'Reports', href: '/reports', icon: FileText },
   { name: 'Customers', href: '/customers', icon: Users },
+  { name: 'Cash Book', href: '/cashbook', icon: BookOpenText },
   { name: 'Master Settings', href: '/settings', icon: Settings },
 ]
 

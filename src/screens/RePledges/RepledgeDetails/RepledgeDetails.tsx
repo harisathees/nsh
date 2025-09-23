@@ -55,11 +55,11 @@ const PaginationNav: React.FC<PaginationNavProps> = ({ currentPage, totalPages, 
 
   return (
     <div className="flex items-center justify-between px-4 py-3">
-      <div className="text-xs text-slate-600">
+      {/* <div className="text-xs text-slate-600">
         {totalItems !== undefined && itemsPerPage !== undefined
           ? `Showing page ${currentPage} of ${totalPages} — ${totalItems} records`
           : `Page ${currentPage} of ${totalPages}`}
-      </div>
+      </div> */}
 
       <nav className="inline-flex items-center space-x-2" aria-label="Pagination">
         <button
