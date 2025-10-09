@@ -23,10 +23,10 @@ export function ProtectedRoute({ children }: { children: JSX.Element }) {
 
   if (loading) return <p>Loading...</p>;
 
-  if (!session) {
-    // Redirect to the NotLoggedIn page
-    return <Navigate to="/not-logged-in" replace />;
-  }
+  // if (!session) {
+  //   // Redirect to the NotLoggedIn page
+  //   return <Navigate to="/not-logged-in" replace />;
+  // }
 
   return children;
 }

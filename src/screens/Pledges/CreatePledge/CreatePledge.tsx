@@ -38,6 +38,7 @@ export interface LoanData {
   amount: number;
   interest_rate: string;
   validity_months: number;
+  include_processing_fee?: boolean; // Add this line
   interest_taken: boolean;
   payment_method: string;
   processing_fee: number;
@@ -83,6 +84,7 @@ export const CreatePledge = (): JSX.Element => {
     amount: 0,
     interest_rate: '',
     validity_months: 3,
+    include_processing_fee: true,
     interest_taken: false,
     payment_method: '',
     processing_fee: 0,
@@ -148,20 +150,20 @@ export const CreatePledge = (): JSX.Element => {
       return false;
     }
     if (jewelData.length === 0 || !jewelData[0].type) {
-        toast.error('At least one jewel is required');
-        return false;
+      toast.error('At least one jewel is required');
+      return false;
     }
 
     for (let i = 0; i < jewelData.length; i++) {
-        const jewel = jewelData[i];
-        if (!jewel.type.trim()) {
-            toast.error(`Jewel ${i + 1}: Type is required`);
-            return false;
-        }
-        if (jewel.weight <= 0) {
-            toast.error(`Jewel ${i + 1}: Weight must be greater than 0`);
-            return false;
-        }
+      const jewel = jewelData[i];
+      if (!jewel.type.trim()) {
+        toast.error(`Jewel ${i + 1}: Type is required`);
+        return false;
+      }
+      if (jewel.weight <= 0) {
+        toast.error(`Jewel ${i + 1}: Weight must be greater than 0`);
+        return false;
+      }
     }
 
     return true;
@@ -172,48 +174,48 @@ export const CreatePledge = (): JSX.Element => {
     if (!validateForm()) return;
 
     setSaving(true);
-    
+
     // This is the async function that toast.promise will track
     const savePledgePromise = async () => {
-        const { data: customer, error: customerError } = await supabase
-          .from('customers')
-          .insert([customerData])
-          .select()
-          .single();
+      const { data: customer, error: customerError } = await supabase
+        .from('customers')
+        .insert([customerData])
+        .select()
+        .single();
 
-        if (customerError) throw new Error(`Customer Error: ${customerError.message}`);
+      if (customerError) throw new Error(`Customer Error: ${customerError.message}`);
 
-        const { data: loan, error: loanError } = await supabase
-          .from('loans')
-          .insert([{ ...loanData, customer_id: customer.id, metal_rate: metalRate }])
-          .select()
-          .single();
+      const { data: loan, error: loanError } = await supabase
+        .from('loans')
+        .insert([{ ...loanData, customer_id: customer.id, metal_rate: metalRate }])
+        .select()
+        .single();
 
-        if (loanError) throw new Error(`Loan Error: ${loanError.message}`);
+      if (loanError) throw new Error(`Loan Error: ${loanError.message}`);
 
-        const jewelInserts = jewelData.map(jewel => ({ loan_id: loan.id, ...jewel }));
-        const { error: jewelError } = await supabase.from('jewels').insert(jewelInserts);
+      const jewelInserts = jewelData.map(jewel => ({ loan_id: loan.id, ...jewel }));
+      const { error: jewelError } = await supabase.from('jewels').insert(jewelInserts);
 
-        if (jewelError) throw new Error(`Jewel Error: ${jewelError.message}`);
-        
-        // Return the loan on success so the success handler can use it
-        return loan;
+      if (jewelError) throw new Error(`Jewel Error: ${jewelError.message}`);
+
+      // Return the loan on success so the success handler can use it
+      return loan;
     };
 
     await toast.promise(
-        savePledgePromise(),
-        {
-            loading: 'Creating Pledge...',
-            success: (loan) => {
-                setSaving(false);
-                navigate(`/print-notice/${loan.id}`);
-                return <b>Pledge created successfully!</b>;
-            },
-            error: (err) => {
-                setSaving(false);
-                return <b>{err.message || 'Failed to create pledge.'}</b>;
-            }
+      savePledgePromise(),
+      {
+        loading: 'Creating Pledge...',
+        success: (loan) => {
+          setSaving(false);
+          navigate(`/print-notice/${loan.id}`);
+          return <b>Pledge created successfully!</b>;
+        },
+        error: (err) => {
+          setSaving(false);
+          return <b>{err.message || 'Failed to create pledge.'}</b>;
         }
+      }
     );
   };
 

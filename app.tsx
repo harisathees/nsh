@@ -41,15 +41,9 @@ export default function App() {
         {/* Not logged in route */}
         {/* <Route path="/not-logged-in" element={<NotLoggedIn />} /> */}
 
-<<<<<<< HEAD
-          {/* 404 Route */}
-        {/* <Route path="*" element={<GoldLoan404 />} /> */}
-    
-=======
         {/* 404 Route */}
         <Route path="*" element={<GoldLoan404 />} />
 
->>>>>>> 94b65ac0061f8e9ebb17a29a416713dee2988750
         {/* Routes outside Layout (protected) */}
         <Route
           path="/create-pledge"
@@ -177,9 +171,9 @@ export default function App() {
           <Route
             path="/cashbook"
             element={
-              <ProtectedRoute>
+              // <ProtectedRoute>
                 <CashBook />
-              </ProtectedRoute>
+              /* </ProtectedRoute> */
             }
           />
           <Route

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ArrowLeft, MoreVertical, Plus } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { AddEntryModal } from './AddEntryModal';
-import { CreateCashLog } from './CreateCashLog'; // --- NEW --- Import the creation form
+import { CreateCashLog } from './CreateCashLog'; 
 
 // Interfaces remain the same
 interface CashLog {

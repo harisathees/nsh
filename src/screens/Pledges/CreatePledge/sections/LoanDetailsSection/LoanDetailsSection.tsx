@@ -29,14 +29,14 @@ export const LoanDetailsSection = ({
     if (jewelType === "Silver" && loanData.interest_rate !== "5") {
       onLoanDataChange({ ...loanData, interest_rate: "5" });
     }
-  }, [jewelType, loanData, onLoanDataChange]);
+  }, [jewelType, loanData.interest_rate, onLoanDataChange]);
 
   useEffect(() => {
     const estimated = totalNetWeight * metalRate * 0.8;
     if (!isNaN(estimated) && Math.round(estimated) !== loanData.estimated_amount) {
       onLoanDataChange({ ...loanData, estimated_amount: Math.round(estimated) });
     }
-  }, [totalNetWeight, metalRate, loanData, onLoanDataChange]);
+  }, [totalNetWeight, metalRate, loanData.estimated_amount, onLoanDataChange]);
 
   useEffect(() => {
     if (loanData.date && loanData.validity_months) {
@@ -47,35 +47,39 @@ export const LoanDetailsSection = ({
         onLoanDataChange({ ...loanData, duedate: dueDateStr });
       }
     }
-  }, [loanData.date, loanData.validity_months, loanData, onLoanDataChange]);
+  }, [loanData.date, loanData.validity_months, loanData.duedate, onLoanDataChange]);
 
+  // --- ⬇️ MODIFIED LOGIC ⬇️ ---
+  // This useEffect now calculates the processing fee based on the toggle.
   useEffect(() => {
-  const amount = Number(loanData.amount) || 0;
-  let fee = amount * 0.0025; // Use 'let' to allow modification
+    const amount = Number(loanData.amount) || 0;
+    const currentFee = Number(loanData.processing_fee) || 0;
+    let newFee = 0;
 
-  // --- Logic to cap the fee at 300 ---
-  if (fee > 300) {
-    fee = 300;
-  }
+    // Only calculate a fee if the toggle is checked
+    if (loanData.include_processing_fee) {
+      newFee = Math.min(amount * 0.0025, 300); // Calculates 0.25% and caps at 300
+    }
 
-  // Only update the state if the calculated fee is different
-  if (fee !== loanData.processing_fee) {
-    onLoanDataChange({ ...loanData, processing_fee: fee });
-  }
-}, [loanData.amount, loanData.processing_fee, onLoanDataChange, loanData]);
+    // Only update state if the calculated fee is different to avoid re-renders
+    if (newFee !== currentFee) {
+      onLoanDataChange({ ...loanData, processing_fee: newFee });
+    }
+  }, [loanData.amount, loanData.include_processing_fee, onLoanDataChange, loanData.processing_fee]);
 
   const formFields = [
     { id: "loan_no", label: "Loan No", type: "text", value: loanData.loan_no, required: true },
     { id: "date", label: "Date", type: "date", value: loanData.date, required: true },
     { id: "amount", label: "Amount", type: "number", value: loanData.amount, required: true },
-    { id: "interest_rate", label: "Interest %", type: "select", options: ["1", "1.5", "2", "2.5", "3", "5"], value: loanData.interest_rate },
+    { id: "interest_rate", label: "Interest %", type: "select", options: ["1", "1.5", "1.75", "2", "2.5", "3", "5"], value: loanData.interest_rate },
     { id: "validity_months", label: "Validity Months", type: "select", options: ["3", "6", "12"], value: loanData.validity_months },
     { id: "duedate", label: "Due Date", type: "date", value: loanData.duedate, readOnly: true },
     { id: "payment_method", label: "Payment Method", type: "select", value: loanData.payment_method, options: ["Cash", "UPI"] },
-    { id: "processing_fee", label: "Processing Fee", type: "number", value: loanData.processing_fee},
+    // The processing fee input is now read-only as it's fully calculated
+    { id: "processing_fee", label: "Processing Fee", type: "number", value: loanData.processing_fee, readOnly: true },
     { id: "estimated_amount", label: "Estimated Amount", type: "number", value: loanData.estimated_amount, readOnly: true },
   ];
-  
+
   const calculateAmountToBeGiven = () => {
     const amount = Number(loanData.amount) || 0;
     const processingFee = Number(loanData.processing_fee) || 0;
@@ -129,21 +133,18 @@ export const LoanDetailsSection = ({
                     id={field.id}
                     placeholder={`${field.label}${field.required ? " *" : ""}`}
                     type={field.type}
-                    // --- ⬇️ THIS IS THE FIX ⬇️ ---
-                    // The value prop is now simplified to prevent formatting issues while typing.
                     value={field.value || ""}
                     readOnly={field.readOnly}
                     onChange={(e) => {
                       const rawValue = e.target.value;
-                      // Allow the input to be cleared
                       if (rawValue === '') {
-                          handleInputChange(field.id as keyof LoanData, '');
+                        handleInputChange(field.id as keyof LoanData, '');
                       } else {
-                          let value: string | number = rawValue;
-                          if (field.type === "number") {
-                              value = parseFloat(rawValue);
-                          }
-                          handleInputChange(field.id as keyof LoanData, value);
+                        let value: string | number = rawValue;
+                        if (field.type === "number") {
+                          value = parseFloat(rawValue);
+                        }
+                        handleInputChange(field.id as keyof LoanData, value);
                       }
                     }}
                     className={`h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid text-gray-700 text-sm font-normal focus:ring-2 focus:ring-[#fff5c5] ${field.readOnly ? 'bg-gray-200 cursor-not-allowed' : ''} ${field.required ? "border-[#269AD4]" : "border-[#269AD4]"
@@ -153,6 +154,23 @@ export const LoanDetailsSection = ({
                 )}
               </div>
             ))}
+
+            {/* --- ⬇️ NEW TOGGLE ⬇️ --- */}
+            {/* This toggle controls whether the processing fee is calculated. */}
+            <div className="relative">
+              <div className="flex items-center gap-3 h-[50px] px-4 py-3 bg-white rounded-[30px] border border-solid border-[#269AD4]">
+                <label htmlFor="include_processing_fee" className="text-sm text-gray-700 flex-1">
+                  Include Processing Fee?
+                </label>
+                <input
+                  id="include_processing_fee"
+                  type="checkbox"
+                  checked={loanData.include_processing_fee || false}
+                  onChange={(e) => handleInputChange("include_processing_fee", e.target.checked)}
+                  className="w-5 h-5 text-[#269AD4] bg-gray-100 border-gray-300 rounded focus:ring-[#269AD4] focus:ring-2"
+                />
+              </div>
+            </div>
 
             {/* Interest Taken Toggle */}
             <div className="relative">
@@ -180,7 +198,7 @@ export const LoanDetailsSection = ({
                 <option value="Active">Active</option>
               </select>
             </div>
-            
+
             <div className="relative pt-2">
               <div className="flex justify-between items-baseline py-3 px-2 border-t border-dashed">
                 <label className="text-base font-medium text-black-700">

@@ -5,7 +5,7 @@ import * as htmlToImage from 'html-to-image';
 import { FiShare2, FiLoader } from 'react-icons/fi'; // <-- Added icon imports
 import bg1 from '../../assets/front.jpg';
 import bg2 from '../../assets/back.jpg';
-
+import { FaIdCard } from 'react-icons/fa';
 
 const CheckIcon = () => (
   <svg
@@ -155,6 +155,7 @@ const NoticePrint = () => {
         jewelImage: jewelImageUrl,
         goldRate: loan.gold_rate ?? goldRate,
         silverRate: loan.silver_rate ?? silverRate,
+        ID: customer?.id_proof,
       });
 
       setLoading(false);
@@ -287,9 +288,11 @@ const NoticePrint = () => {
         style={{ position: 'relative', width: '210mm', height: '297mm', margin: '0 auto', overflow: 'hidden' }}
       >
         <img src={bg1} alt="front" style={{ position: 'absolute', width: '210mm', height: '297mm' }} />
+
+
         {data.customerImage && (
           <div style={{
-            position: 'absolute', top: '90mm', left: '64mm', width: '26mm', height: '33mm',
+            position: 'absolute', top: '90mm', left: '70mm', width: '26mm', height: '33mm',
             transform: 'rotate(90deg)', transformOrigin: 'left top', overflow: 'hidden',
             border: '2px solid black', zIndex: 1,
           }}>
@@ -305,6 +308,7 @@ const NoticePrint = () => {
             <img src={data.jewelImage} alt="Jewel" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         )}
+
         {data.customerImage && (
           <div style={{
             position: 'absolute', top: '91mm', left: '179mm', width: '26mm', height: '33mm',
@@ -316,7 +320,7 @@ const NoticePrint = () => {
         )}
         {data.jewelImage && (
           <div style={{
-            position: 'absolute', top: '119mm', left: '64mm', width: '26mm', height: '33mm',
+            position: 'absolute', top: '119mm', left: '70mm', width: '26mm', height: '33mm',
             transform: 'rotate(90deg)', transformOrigin: 'left top', overflow: 'hidden',
             border: '2px solid black', zIndex: 1,
           }}>
@@ -346,44 +350,49 @@ const NoticePrint = () => {
 
 // The old buttonStyle function is no longer needed and can be removed.
 // const buttonStyle = (bg: string) => ({...});
+const fields = (data: any) => {
+  const monthlyInterest = (data.amount * data.interest) / 100;
+  return [
+    //office copy
+    { top: '100.5mm', left: '201mm', label: `Date:${data.date}` },
+    { top: '100.5mm', left: '196mm', label: `Due :${data.duedate}` },
+    { top: '100.5mm', left: '188mm', label: `G:${data.goldRate}` },
+    { top: '121.5mm', left: '188mm', label: `S:${data.silverRate}` },
+    { top: '2.5mm', left: '187mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+    // { top: '44mm', left: '187mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon /> : <CrossIcon />}</span> },
+    { top: '2.5mm', left: '179mm', label: `கடன் எண்:${data.itemNo}` },
+    { top: '2.5mm', left: '172mm', label: `தரம்:${data.quality}` },
+    { top: '2.5mm', left: '165mm', label: `Pcs: ${data.count}` },
+    { top: '2.5mm', left: '158mm', label: `வட்டி: ${data.interest}% (₹${monthlyInterest.toFixed(0)}/M)` },
+    { top: '2.5mm', left: '151mm', label: `Faults: ${data.faults}` },
+    { top: '2.5mm', left: '144mm', label: `பொருள்: ${data.jewelName}` },
+    { top: '2.5mm', left: '137mm', label: `முகவரி: ${data.address}` },
+    { top: '45mm', left: '179mm', label: `பெயர்: ${data.name}` },
+    { top: '45mm', left: '172mm', label: `தொகை: ₹${data.amount}/-` },
+    { top: '45mm', left: '165mm', label: `எடை: ${data.weight}g` },
+    { top: '45mm', left: '158mm', label: ` ${data.phone},${data.whatsapp}` },
+    { top: '92mm', left: '146mm', label: (<span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaIdCard />{data.ID?.replace(/\D/g, '') || 'N/A'}</span>), },
+    { top: '44mm', left: '187mm', label: `${data.interestTaken ? '✅வ.பெ' : '❌வ.எவி'}` },
 
-const fields = (data: any) => [
-  //officer copy
-  { top: '100.5mm', left: '201mm', label: `Date:${data.date}` },
-  { top: '100.5mm', left: '196mm', label: `Due :${data.duedate}` },
-  { top: '100.5mm', left: '188mm', label: `G:${data.goldRate}` },
-  { top: '121.5mm', left: '188mm', label: `S:${data.silverRate}` },
-  { top: '2.5mm', left: '187mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
-  { top: '44mm', left: '187mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon /> : <CrossIcon />}</span> },
 
-  { top: '2.5mm', left: '181mm', label: `கடன் எண்:${data.itemNo}` },
-  { top: '2.5mm', left: '174mm', label: `தரம்:${data.quality}` },
-  { top: '2.5mm', left: '167mm', label: `Pcs: ${data.count}` },
-  { top: '2.5mm', left: '160mm', label: `வட்டி: ${data.interest}%` },
-  { top: '2.5mm', left: '153mm', label: `Faults: ${data.faults}` },
-  { top: '2.5mm', left: '146mm', label: `பொருள்: ${data.jewelName}` },
-  { top: '2.5mm', left: '139mm', label: `முகவரி: ${data.address}` },
-  { top: '44mm', left: '180mm', label: `பெயர்: ${data.name}` },
-  { top: '44mm', left: '172mm', label: `தொகை: ₹${data.amount}/-` },
-  { top: '44mm', left: '164mm', label: `எடை: ${data.weight}g` },
-  { top: '44mm', left: '156mm', label: ` ${data.phone},${data.whatsapp}` },
+    //customer copy
+    { top: '100.5mm', left: '95mm', label: `Date:${data.date}` },
+    { top: '100.5mm', left: '90mm', label: `Due :${data.duedate}` },
+    { top: '2.5mm', left: '80mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
+    // { top: '2.5mm', left: '70mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon  /> : <CrossIcon />}</span> },
+    { top: '2.5mm', left: '63mm', label: `கடன் எண்:${data.itemNo}` },
+    { top: '2.5mm', left: '56mm', label: `Pcs: ${data.count}` },
+    { top: '2.5mm', left: '49mm', label: `வட்டி: ${data.interest}%(₹${monthlyInterest.toFixed(0)}/M)` },
+    { top: '2.5mm', left: '42mm', label: `பொருள்: ${data.jewelName}` },
+    { top: '2.5mm', left: '35mm', label: `Faults: ${data.faults}` },
+    { top: '45mm', left: '70mm', label: `பெயர்: ${data.name}` },
+    { top: '45mm', left: '63mm', label: `தொகை: ₹${data.amount}/-` },
+    { top: '45mm', left: '56mm', label: `எடை: ${data.weight}g` },
+    { top: '95.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
+    { top: '90mm', left: '36mm', label: (<span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaIdCard />{data.ID?.replace(/\D/g, '') || 'N/A'}</span>), },
+    { top: '2.5mm', left: '70mm', label: `${data.interestTaken ? '✅வ.பெ' : '❌வ.எவி'}` },
 
-  //customer copy
-  { top: '100.5mm', left: '95mm', label: `Date:${data.date}` },
-  { top: '100.5mm', left: '90mm', label: `Due :${data.duedate}` },
-  { top: '2.5mm', left: '80mm', label: `Rate/g: ₹${(data.weight > 0 ? (data.amount / data.weight).toFixed(2) : '0.0')}` },
-  { top: '44mm', left: '80mm', label: <span style={{ display: 'flex', alignItems: 'center' }}>Int.Taken?: {data.interestTaken ? <CheckIcon /> : <CrossIcon />}</span> },
-  { top: '2.5mm', left: '70mm', label: `கடன் எண்:${data.itemNo}` },
-  { top: '2.5mm', left: '62mm', label: `Pcs: ${data.count}` },
-  { top: '2.5mm', left: '54mm', label: `வட்டி: ${data.interest}%` },
-  { top: '2.5mm', left: '46mm', label: `பொருள்: ${data.jewelName}` },
-  { top: '2.5mm', left: '38mm', label: `Faults: ${data.faults}` },
-  { top: '44mm', left: '70mm', label: `பெயர்: ${data.name}` },
-  { top: '44mm', left: '62mm', label: `தொகை: ₹${data.amount}/-` },
-  { top: '44mm', left: '54mm', label: `எடை: ${data.weight}g` },
-  { top: '95.5mm', left: '85mm', label: ` ${data.phone},${data.whatsapp}` },
-  // { top: '250.5mm', left: '30mm', label: `Int. Taken: ${data.interestTaken ? 'Yes' : 'No'}` },
-
-];
+  ];
+};
 
 export default NoticePrint;
