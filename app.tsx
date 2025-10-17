@@ -21,17 +21,15 @@ import { ViewRepledge } from "./src/screens/RePledges/ViewRepledge";
 import { EditRepledge } from "./src/screens/RePledges/EditRepledge";
 import { CloseRepledge } from "./src/screens/RePledges/CloseRepledge/CloseRepledge";
 import CashBook from './src/components/cashbook/CashBook';
-
-// ProtectedRoute
-// import { ProtectedRoute } from "./src/screens/Login/auth/ProtectedRoute";
+import { AuthProvider } from "./src/context/AuthContext";
 import GoldLoan404 from "./src/screens/404Page/404page";
-import { NotLoggedIn } from "./src/screens/Login/NotLoggedIn/NotLoggedIn";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="bottom-center" />
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Toaster position="bottom-center" />
+        <Routes>
         {/*  Root route decides where to go (dashboard or login) */}
         <Route path="/" element={<RedirectBasedOnAuth />} />
 
@@ -195,5 +193,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </AuthProvider>
   );
 }

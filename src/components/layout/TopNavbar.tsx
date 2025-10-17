@@ -1,16 +1,36 @@
-import React from 'react'
-import { Menu, Bell, Search } from 'lucide-react'
+import React, { useState } from 'react'
+import { Menu, LogOut, Building2, User } from 'lucide-react'
 import { Avatar, AvatarFallback } from '../ui/avatar'
+import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '../ui/button'
 
 interface TopNavbarProps {
   onMenuClick: () => void
 }
 
 export function TopNavbar({ onMenuClick }: TopNavbarProps) {
+  const { user, branch, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="flex items-center justify-between px-4 py-3 lg:px-6">
-        {/* Left side */}
         <div className="flex items-center space-x-4">
           <button
             onClick={onMenuClick}
@@ -18,40 +38,47 @@ export function TopNavbar({ onMenuClick }: TopNavbarProps) {
           >
             <Menu className="w-6 h-6" />
           </button>
-          
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search loans, customers..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
-              />
-            </div>
+
+          <div className="hidden md:flex items-center space-x-2 bg-blue-50 px-4 py-2 rounded-lg">
+            <Building2 className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-semibold text-blue-900">{branch?.name || 'Branch'}</span>
           </div>
         </div>
 
-        {/* Right side */}
         <div className="flex items-center space-x-4">
-          {/* <button className="p-2 rounded-md hover:bg-gray-100 relative">
-            <Bell className="w-5 h-5 text-gray-600" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-          </button> */}
-
-          <div className="flex items-center space-x-3">
-            <div className="relative">
+          <div className="relative">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            >
               <Avatar className="w-9 h-9">
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                  SH
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold">
+                  {getInitials(user?.fullName || 'User')}
                 </AvatarFallback>
               </Avatar>
-              {/* <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div> */}
-            </div>
 
-            <div className="hidden sm:block">
-              <p className="text-sm font-semibold text-gray-900">Sabari Harish</p>
-              {/* <p className="text-xs text-gray-500">Admin</p> */}
-            </div>
+              <div className="hidden sm:block text-left">
+                <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
+                <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+              </div>
+            </button>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>
+                  <p className="text-xs text-gray-500">{user?.username}</p>
+                  <p className="text-xs text-gray-500 mt-1 capitalize">{user?.role} - {branch?.name}</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

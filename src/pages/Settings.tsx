@@ -17,12 +17,13 @@ import {
   Building2,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { BankManagement } from '../screens/RePledges/CreateRePledge/BankManagement'
+import { BankManagement } from '../screens/RePledges/CreateRePledge/BankManagement';
+import { UserManagement } from '../components/settings/UserManagement';
 
 const settingsSections = [
   { id: 'metal_rates', title: 'Metal Rates', description: 'Update daily Gold and Silver rates.', icon: <Coins className="w-5 h-5" /> },
-  { id: 'bank_management', title: 'Bank Management', description: 'Manage bank details and settings.', icon: <Building2 className="w-5 h-5" /> },
   { id: 'user_management', title: 'User Management', description: 'Manage user roles and permissions.', icon: <Users className="w-5 h-5" /> },
+  { id: 'bank_management', title: 'Bank Management', description: 'Manage bank details and settings.', icon: <Building2 className="w-5 h-5" /> },
   { id: 'general', title: 'General', description: 'Basic application configuration.', icon: <SettingsIcon className="w-5 h-5" /> },
 ];
 
@@ -150,9 +151,9 @@ export function Settings() {
     const renderContent = () => {
         switch (activeSection) {
             case 'metal_rates': return <MetalRatesPanel />;
-            case 'general': return <PlaceholderPanel title="General Settings" />;
-            case 'user_management': return <PlaceholderPanel title="User Management" />;
+            case 'user_management': return <UserManagement />;
             case 'bank_management': return <BankManagement title="bank Management" />;
+            case 'general': return <PlaceholderPanel title="General Settings" />;
             default: return <MetalRatesPanel />;
         }
     };
