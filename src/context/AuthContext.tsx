@@ -17,10 +17,13 @@ interface User {
 interface AuthContextType {
   user: User | null;
   branch: Branch | null;
+  selectedBranch: Branch | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  setSelectedBranch: (branch: Branch | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,17 +31,33 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [branch, setBranch] = useState<Branch | null>(null);
+  const [selectedBranch, setSelectedBranchState] = useState<Branch | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedAuth = localStorage.getItem('auth');
+    const storedAuth = sessionStorage.getItem('auth');
     if (storedAuth) {
-      const auth = JSON.parse(storedAuth);
-      setUser(auth.user);
-      setBranch(auth.branch);
+      try {
+        const auth = JSON.parse(storedAuth);
+        setUser(auth.user);
+        setBranch(auth.branch);
+        setSelectedBranchState(auth.selectedBranch || auth.branch);
+      } catch (e) {
+        sessionStorage.removeItem('auth');
+      }
     }
     setIsLoading(false);
   }, []);
+
+  const setSelectedBranch = (newBranch: Branch | null) => {
+    setSelectedBranchState(newBranch);
+    const storedAuth = sessionStorage.getItem('auth');
+    if (storedAuth) {
+      const auth = JSON.parse(storedAuth);
+      auth.selectedBranch = newBranch;
+      sessionStorage.setItem('auth', JSON.stringify(auth));
+    }
+  };
 
   const login = async (username: string, password: string) => {
     try {
@@ -71,8 +90,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(userData);
       setBranch(branchData);
+      setSelectedBranchState(branchData);
 
-      localStorage.setItem('auth', JSON.stringify({ user: userData, branch: branchData }));
+      sessionStorage.setItem('auth', JSON.stringify({
+        user: userData,
+        branch: branchData,
+        selectedBranch: branchData,
+        timestamp: new Date().getTime()
+      }));
 
       return { success: true };
     } catch (err) {
@@ -84,18 +109,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     setBranch(null);
-    localStorage.removeItem('auth');
+    setSelectedBranchState(null);
+    sessionStorage.removeItem('auth');
   };
+
+  const isAdmin = user?.role === 'admin';
 
   return (
     <AuthContext.Provider
       value={{
         user,
         branch,
+        selectedBranch,
         isAuthenticated: !!user && !!branch,
         isLoading,
+        isAdmin,
         login,
-        logout
+        logout,
+        setSelectedBranch
       }}
     >
       {children}

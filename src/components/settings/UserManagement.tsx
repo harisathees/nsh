@@ -34,7 +34,7 @@ interface Branch {
 }
 
 export const UserManagement = () => {
-  const { user: currentUser, branch } = useAuth();
+  const { user: currentUser, branch, selectedBranch, isAdmin } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,24 +49,28 @@ export const UserManagement = () => {
     password: '',
     full_name: '',
     role: 'staff',
-    branch_id: branch?.id || '',
+    branch_id: selectedBranch?.id || branch?.id || '',
   });
-
-  const isAdmin = currentUser?.role === 'admin';
 
   useEffect(() => {
     fetchUsers();
     fetchBranches();
-  }, [branch?.id]);
+  }, [selectedBranch?.id, isAdmin]);
 
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('users')
-        .select('*')
-        .eq('branch_id', branch?.id)
-        .order('created_at', { ascending: false });
+        .select('*, branches(name, code)');
+
+      if (!isAdmin && selectedBranch?.id) {
+        query = query.eq('branch_id', selectedBranch.id);
+      } else if (isAdmin && selectedBranch?.id) {
+        query = query.eq('branch_id', selectedBranch.id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       setUsers(data || []);
@@ -192,7 +196,7 @@ export const UserManagement = () => {
       password: '',
       full_name: '',
       role: 'staff',
-      branch_id: branch?.id || '',
+      branch_id: selectedBranch?.id || branch?.id || '',
     });
     setIsEdit(false);
     setSelectedUser(null);
@@ -357,6 +361,26 @@ export const UserManagement = () => {
                 <option value="admin">Admin</option>
               </select>
             </div>
+
+            {isAdmin && (
+              <div className="space-y-2">
+                <Label htmlFor="branch_id">Branch</Label>
+                <select
+                  id="branch_id"
+                  value={formData.branch_id}
+                  onChange={(e) => setFormData({ ...formData, branch_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Branch</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name} ({branch.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button

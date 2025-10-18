@@ -1,8 +1,12 @@
-# Branch-Based Authentication System
+# Branch-Based Authentication System - Admin & Staff Roles
 
 ## Overview
 
-The Pawn Brokerage Management System now features a comprehensive branch-based authentication system. Each user is assigned to a specific branch and can only access data from their branch.
+The Pawn Brokerage Management System features a comprehensive role-based branch authentication system:
+
+- **Admin Users**: Can view and edit data from ALL branches by switching between them
+- **Staff/Manager Users**: Can ONLY view and edit data from their assigned branch
+- **Session-based Authentication**: Secure login/logout with session management
 
 ## Database Structure
 
@@ -23,12 +27,12 @@ Stores user accounts:
 - `username` (text) - Login username
 - `password_hash` (text) - Bcrypt hashed password
 - `full_name` (text) - User's full name
-- `branch_id` (uuid) - References branches table
+- `branch_id` (uuid) - References branches table (home branch)
 - `role` (text) - User role: 'admin', 'manager', or 'staff'
 - `is_active` (boolean) - Account status
 
-#### Updated Tables
-All business tables now include `branch_id`:
+#### Business Tables
+All business tables include `branch_id`:
 - `customers`
 - `loans`
 - `jewels`
@@ -38,71 +42,106 @@ All business tables now include `branch_id`:
 
 ## Default Users
 
-Three admin users are created by default (one per branch):
+Three admin users (one per branch):
 
-| Username | Password | Branch | Role |
-|----------|----------|--------|------|
-| admin_chn | admin123 | Chennai | admin |
-| admin_mdu | admin123 | Madurai | admin |
-| admin_slm | admin123 | Salem | admin |
+| Username | Password | Branch | Role | Access |
+|----------|----------|--------|------|--------|
+| admin_chn | admin123 | Chennai | admin | All branches |
+| admin_mdu | admin123 | Madurai | admin | All branches |
+| admin_slm | admin123 | Salem | admin | All branches |
 
 **⚠️ IMPORTANT: Change these passwords immediately in production!**
 
-## Features
+## Key Features
 
-### 1. Login System
+### 1. Role-Based Access Control
+
+#### Admin Users
+- **Multi-Branch Access**: Can view/edit data from ANY branch
+- **Branch Switcher**: Dropdown in top navbar to switch between branches
+- **User Management**: Can create users for any branch
+- **Full Visibility**: See all data when switching branches
+
+#### Staff/Manager Users
+- **Single Branch Access**: ONLY see data from their assigned branch
+- **No Branch Switcher**: Fixed branch displayed in navbar
+- **Restricted Management**: Can only manage data within their branch
+- **Automatic Filtering**: All queries automatically filtered by their branch
+
+### 2. Session Management
+- **sessionStorage**: Secure session-based authentication
+- **Auto-logout on browser close**: Sessions don't persist after closing browser
+- **Branch selection persists**: Admin's selected branch saved in session
+- **Secure logout**: Clears all session data
+
+### 3. Login System
 - Username/password authentication
 - Branch assignment at login
-- Session persistence using localStorage
 - Secure password hashing with bcrypt
+- Clear error messages
 
-### 2. User Management (Admin Only)
-Accessible from Settings → User Management:
-- Create new users
-- Edit existing users
+### 4. User Management (Admin Only)
+In Settings → User Management:
+- Create users for any branch (admin only)
+- Edit user details and roles
 - Delete users
-- Assign roles (admin, manager, staff)
-- All users are branch-specific
+- View users by selected branch
+- Assign branch during user creation
 
-### 3. Branch Data Isolation
-- Users can only view/edit data from their assigned branch
-- Branch information displayed in top navigation bar
-- Branch filter automatically applied to all queries
-
-### 4. Role-Based Access
-- **Admin**: Full access, can manage users
-- **Manager**: Data management (no user management)
-- **Staff**: Standard data entry and viewing
-
-## Implementation Details
+## How It Works
 
 ### Authentication Flow
 1. User enters username and password
 2. System calls `authenticate_user()` database function
 3. Password verified using bcrypt
-4. User and branch data stored in context and localStorage
-5. All subsequent queries filtered by branch_id
+4. User data and home branch stored in session
+5. Admin can switch branches; staff cannot
 
-### Branch Filtering
-Use the `useBranchFilter` hook in components:
+### Data Filtering
+
+#### For Admin Users
+```typescript
+// Admin selects Chennai branch
+const { data } = await supabase
+  .from('loans')
+  .select('*')
+  .eq('branch_id', selectedBranchId); // Chennai data only
+
+// Admin switches to Madurai
+// Now sees Madurai data only
+```
+
+#### For Staff Users
+```typescript
+// Staff always filtered by their home branch
+const { data } = await supabase
+  .from('loans')
+  .select('*')
+  .eq('branch_id', userBranchId); // Fixed to staff's branch
+```
+
+### Using the useBranchFilter Hook
 
 ```typescript
 import { useBranchFilter } from '../hooks/useBranchFilter';
 
-const { branchId, addBranchFilter } = useBranchFilter();
+const { branchId, isAdmin, addBranchFilter } = useBranchFilter();
+
+// Get currently active branch ID
+const activeBranchId = branchId;
+
+// For admin: returns selected branch
+// For staff: returns home branch
 
 // Add branch filter to queries
 const { data } = await supabase
-  .from('loans')
+  .from('customers')
   .select('*')
   .eq('branch_id', branchId);
-
-// Or use the helper
-const query = supabase.from('loans').select('*');
-const { data } = await addBranchFilter(query);
 ```
 
 ### Creating New Records
+
 Always include branch_id when inserting:
 
 ```typescript
@@ -110,120 +149,216 @@ const { branchId } = useBranchFilter();
 
 await supabase.from('customers').insert({
   name: 'John Doe',
-  branch_id: branchId,
+  branch_id: branchId, // Uses selected branch (admin) or home branch (staff)
   // ... other fields
 });
 ```
 
-## Security Notes
+## UI Components
 
-### RLS Disabled
-- Row Level Security (RLS) is **NOT enabled** per requirements
-- Data isolation enforced through application logic
-- Branch filtering must be implemented in all data operations
+### Top Navbar
+
+#### For Admin Users
+- **Branch Dropdown**: Click to see all branches
+- **Active Branch Indicator**: Shows currently selected branch
+- **Switch Branches**: Click any branch to switch view
+
+#### For Staff Users
+- **Branch Display**: Shows home branch (no dropdown)
+- **Fixed View**: Cannot change branch
+
+### User Management
+
+#### Admin View
+- See users from selected branch
+- Create users for any branch
+- Branch selection dropdown in form
+- Can assign any role
+
+#### Staff/Manager View
+- Message: "You do not have permission to manage users"
+- Cannot access user management
+
+## Testing Guide
+
+### Test Admin Multi-Branch Access
+
+1. **Login as Admin**
+   ```
+   Username: admin_chn
+   Password: admin123
+   ```
+
+2. **Verify Admin Features**
+   - Check top navbar shows branch dropdown with down arrow
+   - Profile dropdown shows "Admin - Can view all branches"
+   - User management is accessible in Settings
+
+3. **Switch Branches**
+   - Click branch dropdown in navbar
+   - Select "Madurai" branch
+   - Page reloads with Madurai data
+   - Create a test customer in Madurai
+
+4. **Verify Data Isolation**
+   - Switch back to Chennai branch
+   - Test customer from Madurai should NOT appear
+   - Create a customer in Chennai
+   - Switch to Madurai - Chennai customer should NOT appear
+
+### Test Staff Branch Restrictions
+
+1. **Create Staff User**
+   - Login as admin
+   - Go to Settings → User Management
+   - Create new user:
+     - Username: staff_chn
+     - Password: staff123
+     - Role: Staff
+     - Branch: Chennai
+   - Logout
+
+2. **Login as Staff**
+   ```
+   Username: staff_chn
+   Password: staff123
+   ```
+
+3. **Verify Staff Restrictions**
+   - Top navbar shows ONLY "Chennai" (no dropdown)
+   - Profile shows "staff - Chennai" (no admin badge)
+   - Settings → User Management shows "no permission" message
+
+4. **Test Data Access**
+   - Can only see Chennai branch data
+   - Cannot see Madurai or Salem data
+   - All created records automatically assigned to Chennai
+
+### Test Session Management
+
+1. **Login and Create Session**
+   - Login with any user
+   - Verify you can navigate pages
+
+2. **Test Session Persistence**
+   - Refresh page - should stay logged in
+   - Open new tab with same domain - should be logged in
+
+3. **Test Logout**
+   - Click profile dropdown
+   - Click "Logout"
+   - Redirected to login page
+   - Cannot access protected pages
+
+4. **Test Browser Close**
+   - Login again
+   - Close ALL browser windows
+   - Reopen browser and visit site
+   - Should be logged out (sessionStorage cleared)
+
+## Security Features
+
+### Session-Based Authentication
+- Uses `sessionStorage` (not `localStorage`)
+- Session cleared when browser closes
+- No persistent "remember me" by default
 
 ### Password Security
-- Passwords hashed using bcrypt (cost factor 12)
+- Bcrypt hashing (cost factor 12)
 - Hash verification via database function
-- Never store plain text passwords
+- Never stored in plain text
 
-### Session Management
-- Authentication state stored in React Context
-- Persistence via localStorage
-- Logout clears all session data
+### Data Isolation
+- Admin: Can access all branches BUT must select one at a time
+- Staff: Hardcoded to home branch only
+- Branch filtering enforced at query level
 
-## User Management Guide
-
-### Adding Users (Admin Only)
-1. Navigate to Settings → User Management
-2. Click "Add User"
-3. Fill in:
-   - Username (unique)
-   - Full Name
-   - Password (minimum 6 characters)
-   - Role (admin/manager/staff)
-4. User automatically assigned to admin's branch
-
-### Editing Users
-1. Click Edit button next to user
-2. Modify full name or role
-3. Optionally change password (leave blank to keep current)
-4. Save changes
-
-### Deleting Users
-1. Click Delete button next to user
-2. Confirm deletion
-3. User permanently removed
-
-## Testing
-
-### Test Accounts
-Login with any of these accounts:
-
-```
-Chennai Branch:
-Username: admin_chn
-Password: admin123
-
-Madurai Branch:
-Username: admin_mdu
-Password: admin123
-
-Salem Branch:
-Username: admin_slm
-Password: admin123
-```
-
-### Verification Steps
-1. Login with different branch users
-2. Verify branch name shows in top navbar
-3. Create data in one branch
-4. Login with different branch
-5. Confirm data is not visible
-6. Test user management (admin only)
+### Role Verification
+- User role checked on every action
+- Admin-only features protected
+- Staff cannot escalate privileges
 
 ## API Functions
 
 ### `authenticate_user(username, password)`
-Authenticates user and returns:
+Returns:
 - user_id
 - username
 - full_name
-- branch_id
+- branch_id (home branch)
 - branch_name
 - branch_code
-- role
+- role (admin/manager/staff)
 
 ### `hash_password(password)`
 Hashes password using bcrypt.
 
 ### `verify_password(password, hash)`
-Verifies password against hash.
+Verifies password against stored hash.
+
+## Common Use Cases
+
+### Admin Creating User for Another Branch
+1. Login as admin (any branch)
+2. Switch to target branch in navbar
+3. Go to Settings → User Management
+4. Click "Add User"
+5. Fill form - branch auto-selected
+6. Or manually select different branch
+7. User created for that branch
+
+### Staff Viewing Their Data
+1. Login as staff
+2. Automatically see only their branch data
+3. Create/edit records - auto-assigned to their branch
+4. Cannot accidentally see other branches
+
+### Admin Auditing All Branches
+1. Login as admin
+2. Switch to Branch A - review data
+3. Switch to Branch B - review data
+4. Switch to Branch C - review data
+5. Each switch shows only that branch's data
 
 ## Troubleshooting
 
-### Login Issues
-- Verify username is correct (case-sensitive)
-- Check password (minimum 6 characters)
-- Ensure user account is active
-- Confirm branch is active
+### Admin Can't Switch Branches
+- Check isAdmin flag in context
+- Verify user role is 'admin' in database
+- Clear sessionStorage and re-login
 
-### Data Not Showing
-- Verify branch_id is included in queries
-- Check useBranchFilter hook is used
-- Confirm data belongs to current branch
+### Staff Seeing No Data
+- Verify branch_id exists on records
+- Check user's branch_id matches data
+- Ensure branch is active
 
-### User Management Not Accessible
-- Only admins can manage users
-- Check logged-in user role
-- Verify admin permissions in database
+### Session Not Persisting
+- Check sessionStorage not disabled
+- Verify browser allows sessionStorage
+- Check for console errors
+
+### Branch Filter Not Working
+- Verify useBranchFilter hook is used
+- Check selectedBranch vs branch in context
+- Ensure query includes .eq('branch_id', ...)
+
+## Best Practices
+
+1. **Always use useBranchFilter hook** in components that fetch data
+2. **Include branch_id** in all insert operations
+3. **Test with both admin and staff** accounts
+4. **Document branch-specific business logic**
+5. **Regular password updates** for production users
+6. **Audit admin actions** in production
+7. **Backup data by branch** for easy restoration
 
 ## Future Enhancements
 
-Consider adding:
-- Password reset functionality
-- Email-based authentication
-- Multi-branch access for super admins
-- Audit logs for user actions
+- Audit logs for admin branch switches
+- Branch-wise reporting and analytics
+- Multi-branch user access (one user, multiple branches)
+- Super admin role (never assigned to branch)
+- Branch-wise permissions (beyond just roles)
 - Session timeout configuration
 - Two-factor authentication
+- IP-based access restrictions

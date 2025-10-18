@@ -1,22 +1,31 @@
 import { useAuth } from '../context/AuthContext';
 
 export const useBranchFilter = () => {
-  const { branch } = useAuth();
+  const { selectedBranch, isAdmin } = useAuth();
 
   const addBranchFilter = (query: any) => {
-    if (branch?.id) {
-      return query.eq('branch_id', branch.id);
+    if (!isAdmin && selectedBranch?.id) {
+      return query.eq('branch_id', selectedBranch.id);
+    }
+    if (isAdmin && selectedBranch?.id) {
+      return query.eq('branch_id', selectedBranch.id);
     }
     return query;
   };
 
-  const getBranchId = () => branch?.id || null;
+  const getBranchId = () => selectedBranch?.id || null;
+
+  const getActiveBranchId = () => {
+    return selectedBranch?.id || null;
+  };
 
   return {
-    branchId: branch?.id,
-    branchName: branch?.name,
-    branchCode: branch?.code,
+    branchId: selectedBranch?.id,
+    branchName: selectedBranch?.name,
+    branchCode: selectedBranch?.code,
+    isAdmin,
     addBranchFilter,
-    getBranchId
+    getBranchId,
+    getActiveBranchId
   };
 };
